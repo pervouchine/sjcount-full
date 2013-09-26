@@ -27,8 +27,7 @@ vesrion of bam2ssj (see https://github.com/pervouchine/bam2ssj)
 
 INSTALLATION INSTRUCTIONS:
 
-To install, enter the directory and type:
-make all
+To install, type 'make all'
 
 Prerequisites:
 	You need to install samtools
