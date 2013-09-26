@@ -41,10 +41,12 @@ Prerequisites:
 (!)	don't forget to update the SAMDIR varibale in the makefile
 
 (!)	Some users get error messages even when compiling sjcount with a correct SAMDIR path, something like
+
 	/centos6/samtools-9.3.2013/libbam.a(bgzf.o): In function `mt_destroy':
 	/centos6/samtools-9.3.2013/bgzf.c:458: undefined reference to `pthread_join'
 	/centos6/samtools-9.3.2013/libbam.a(bgzf.o): In function `bgzf_mt':
 	/centos6/samtools-9.3.2013/bgzf.c:445: undefined reference to `pthread_create'
+
 	Please note that this has to do with big zip libraries, not with samtools
 
 ============================================================================
