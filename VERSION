@@ -1,0 +1,23 @@
+v1.3, 2012/07/15
+	1) strands are treated separately (separate pointers)
+	2) bug with over-writibg the value of end and other_end fixed
+	3) summary became side-specific
+	4) added: GPL
+
+v1.4 	1) read strandness is specified in the command line; switch_reads deprecated
+	2) report read statistics on rd1/rd2 and +/- strand
+	3) index file is not needed, removed loading bai file
+	4) check whether the BAM file was sorted and if not then exit(1)
+	5) support reads with more than one N in cigar (keep counting when read spans over more than one junction)
+	6) updated statistics on read counts
+	7) soft and hard clipping + padding operations added
+
+v1.5	1) if stranded AND (read is both read1 and read2 OR read is neither read1 nor read2) then skip
+	2) if not stranded then report only one (correct) strand in both output file and log file
+	3) min_lemgth and max_length added as command line options
+
+v1.6	1) added example.mk, it downloads gencode v10 and one of the bam files, then runs bam2ssj
+	2) cleaned up the readme file
+
+v1.7 	1) added contraint on flagged reads
+	2) important: added margin for supporting and covering reads
