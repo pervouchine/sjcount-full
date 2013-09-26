@@ -38,19 +38,22 @@ Prerequisites:
 
 	Samtools package Version: 0.1.18-dev (r982:313) is compartible (and likely so are oder versions)
 
-(!)	don't forget to update the SAMDIR varibale in the makefile
+NOTE that
 
-(!)	Some users get error messages even when compiling sjcount with a correct SAMDIR path, something like
+1.	You need to to update the SAMDIR varibale in the makefile
+
+2.	Some users get error messages even when compiling sjcount with a correct SAMDIR path, something like
 
 	/centos6/samtools-9.3.2013/libbam.a(bgzf.o): In function `mt_destroy':
 	/centos6/samtools-9.3.2013/bgzf.c:458: undefined reference to `pthread_join'
 	/centos6/samtools-9.3.2013/libbam.a(bgzf.o): In function `bgzf_mt':
 	/centos6/samtools-9.3.2013/bgzf.c:445: undefined reference to `pthread_create'
 
-	Please note that this has to do with big zip libraries, not with samtools
+This error has to do with big zip libraries, not with samtools
 
 ============================================================================
-USAGE: 
+
+USAGE
 
 ./sjcount -bam <bam_file> -ssj <junctions_output> -ssc <boundaries_output> [-maxlen <max_intron_length>] [-minlen <min_intron_length>] [-margin <length>] [-read1 0/1] [-read2 0/1]
 
@@ -61,9 +64,31 @@ Options:
 	-margin <length> minimum number of flanking nucleotides in the read in order to support SJ or EB, (default=4)
 	-read1 0/1, reverse complement read1 no/yes (default=1)
 	-read2 0/1, reverse complement read2 no/yes (default=0)
+	-binsize <size of the overhang bin>, (default=100)
+	-nbins <number of overhang bins>, (default=1)
+	-lim <nreads> stop after nreads, (default=no limit)
 
 Output: (1) Junction counts, tab-delimited  (default=stdout)
-	Columns are: chr, begin, end, counts (+strand), counts(-strand)
+	Columns are: chr, begin, end, strand, offset, count
 	(2) Boundary counts, tab-delimited  (default=stdout)
-	Columns are: chr, position, counts (+strand), counts(-strand)
+	Columns are: chr, position, strand, offset, count 
+
+============================================================================
+
+DETAILS
+
+	Each 'N' in the CIGAR string defines a splice junction. The lengths of the continuous portions of the upstream 
+	and downstream alignment (M, match only!) have to be at least <margin> nucleotides. The break has to be between
+	<min_intron_length> and <max_intron_length>. Next, each 'N' in the CIGAR has a continuous portion upstream from 
+	the start of the alignment or previous N (i.e., only M/I/D). It is called 'offset'. Offset is used to bin reads 
+	by the formula {bin = (int) offset/binsize}. The max value of 'bin' is enforced to be nbins - 1. By default, 
+	nbins = 1, i.e., all SJ counts fall into one bin.
+ 
+
+
+
+
+
+
+
 
