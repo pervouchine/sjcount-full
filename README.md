@@ -36,7 +36,7 @@ Prerequisites:
 	svn co https://samtools.svn.sourceforge.net/svnroot/samtools/trunk/samtools
 	enter the directory and type 'make all'
 
-	Samtools package Version: 0.1.18-dev (r982:313) is compartible (and likely oder versions also are)
+	Samtools package Version: 0.1.18-dev (r982:313) is compartible (and likely so are oder versions)
 
 (!)	don't forget to update the SAMDIR varibale in the makefile
 
