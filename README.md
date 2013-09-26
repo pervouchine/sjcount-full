@@ -1,4 +1,4 @@
-Copyright 2012 Dmitri Pervouchine (dp@crg.eu), Lab Roderic Guigo
+Copyright 2013 Dmitri Pervouchine (dp@crg.eu), Lab Roderic Guigo
 Bioinformatics and Genomics Group @ Centre for Genomic Regulation
 Parc de Recerca Biomedica: Dr. Aiguader, 88, 08003 Barcelona
 
@@ -13,7 +13,7 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
+You should have received a copy of the GNU General Public License v.2
 along with 'sjcount' package.  If not, see <http://www.gnu.org/licenses/>.
 
 ============================================================================
