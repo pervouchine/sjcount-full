@@ -55,27 +55,27 @@ This error has to do with big zip libraries, not with samtools
 
 USAGE
 
-./sjcount -bam <bam_file> -ssj <junctions_output> -ssc <boundaries_output> [-maxlen <max_intron_length>] [-minlen <min_intron_length>] [-margin <length>] [-read1 0/1] [-read2 0/1]
+./sjcount -bam bam_file [-ssj junctions_output] [-ssc boundaries_output] [-log log_file] [-maxlen max_intron_length] [-minlen min_intron_length] [-margin length] [-read1 0|1] [-read2 0|1] [-nbins number_of_bins] [-binsize bin_size] [-lim number_of_lines] [-quiet]
 
 Input:   a (sorted) BAM file
-Options:
 
-	-maxlen <upper limit on intron length>, 0 = no limit (default=0)
-	-minlen <lower limit on intron length>, 0 = no limit (default=0)
-	-margin <length>, minimum number of flanking nucleotides in the read in order to support SJ or EB, (default=0)
+Options:
+	-maxlen upper limit on intron length, 0 = no limit (default=0)
+	-minlen lower limit on intron length, 0 = no limit (default=0)
+	-margin length, minimum number of flanking nucleotides in the read in order to support SJ or EB, (default=0)
 	-read1 0/1, reverse complement read1 no/yes (default=0)
 	-read2 0/1, reverse complement read2 no/yes (default=0)
-	-binsize <size of the overhang bin>, (default=+INFTY)
-	-nbins <number of overhang bins>, (default=1)
-	-lim <nreads> stop after nreads, (default=no limit)
+	-binsize size of the overhang bin, (default=+INFTY)
+	-nbins number of overhang bins, (default=1)
+	-lim nreads stop after nreads, (default=no limit)
 	-quiet, suppress verbose output
 
-Output: 
+Output:
+	-ssj: Splice junction counts, tab-delimited  (default = stdout)
+	Columns are: chr, begin, end, offset, count (+), count (-)
+	-ssc: Splice boundary counts, tab-delimited  (default = none)
+	Columns are: chr, position, count (+), count (-)
 
-	(1) Junction counts, tab-delimited  (default = stdout)
-	Columns are: chr, begin, end, strand, offset, count
-	(2) Boundary counts, tab-delimited  (default = none)
-	Columns are: chr, position, strand, offset, count 
 
 ============================================================================
 

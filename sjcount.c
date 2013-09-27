@@ -139,9 +139,9 @@ int main(int argc,char* argv[]) {
 
     if(argc==1) {
         fprintf(stderr, "This utility counts split reads supporting splice junctions and continuous reads covering exon/intron boundaries; annotation-agnostic version\n");
-        fprintf(stderr, "%s -bam <bam_file> [-ssj <junctions_output>] [-ssc <boundaries_output>] [-log <log_file>] ",argv[0]);
-	fprintf(stderr, "[-maxlen <max_intron_length>] [-minlen <min_intron_length>] [-margin <length>] [-read1 0/1] [-read2 0/1] ");
-        fprintf(stderr, "[-nbins <number_of_bins>] [-binsize <bin_size>] [-lim <number_of_lines>] [-quiet]\n");
+        fprintf(stderr, "%s -bam bam_file [-ssj junctions_output] [-ssc boundaries_output] [-log log_file] ",argv[0]);
+	fprintf(stderr, "[-maxlen max_intron_length] [-minlen min_intron_length] [-margin length] [-read1 0|1] [-read2 0|1] ");
+        fprintf(stderr, "[-nbins number_of_bins] [-binsize bin_size] [-lim number_of_lines] [-quiet]\n");
         fprintf(stderr, "Type %s -h for more info\n",argv[0]);
         exit(1);
     }
@@ -168,14 +168,14 @@ int main(int argc,char* argv[]) {
         if(strcmp(argv[i], "-h") ==0 ) {
             fprintf(stderr, "Input:  a sorted BAM file with a header\n");
             fprintf(stderr, "Options:\n");
-            fprintf(stderr, "\t-maxlen <upper limit on intron length>, 0 = no limit (default=%i)\n",max_intron_length);
-            fprintf(stderr, "\t-minlen <lower limit on intron length>, 0 = no limit (default=%i)\n",min_intron_length);
-            fprintf(stderr, "\t-margin <length>, minimum number of flanking nucleotides in the read in order to support SJ or EB, (default=%i)\n",margin);
+            fprintf(stderr, "\t-maxlen upper limit on intron length, 0 = no limit (default=%i)\n",max_intron_length);
+            fprintf(stderr, "\t-minlen lower limit on intron length, 0 = no limit (default=%i)\n",min_intron_length);
+            fprintf(stderr, "\t-margin length, minimum number of flanking nucleotides in the read in order to support SJ or EB, (default=%i)\n",margin);
             fprintf(stderr, "\t-read1 0/1, reverse complement read1 no/yes (default=%i)\n",rev_compl[0]);
             fprintf(stderr, "\t-read2 0/1, reverse complement read2 no/yes (default=%i)\n",rev_compl[1]);
-            fprintf(stderr, "\t-binsize <size of the overhang bin>, (default=+INFTY)\n");
-	    fprintf(stderr, "\t-nbins <number of overhang bins>, (default=%i)\n", nbins);
-	    fprintf(stderr, "\t-lim <nreads> stop after nreads, (default=no limit)\n");
+            fprintf(stderr, "\t-binsize size of the overhang bin, (default=+INFTY)\n");
+	    fprintf(stderr, "\t-nbins number of overhang bins, (default=%i)\n", nbins);
+	    fprintf(stderr, "\t-lim nreads stop after nreads, (default=no limit)\n");
 	    fprintf(stderr, "\t-quiet, suppress verbose output\n\n"); 
             fprintf(stderr, "Output: (1) Splice junction counts, tab-delimited  (default=stdout)\n");
             fprintf(stderr, "\tColumns are: chr, begin, end, offset, count (+), count (-)\n");
