@@ -73,11 +73,10 @@ Options:
 
 Output:
 
-	-ssj: Splice junction counts, tab-delimited  (default = stdout)
-	Columns are: chr, begin, end, offset, count (+), count (-)
-	-ssc: Splice boundary counts, tab-delimited  (default = none)
-	Columns are: chr, position, count (+), count (-)
-
+	-ssj: Splice Junction counts, tab-delimited  (default=stdout)
+	Columns are: chr, begin, end, strand, offset, count
+	-ssc: Splice boundary counts, tab-delimited  (default=none)
+	Columns are: chr, position, strand, offset, count
 
 ============================================================================
 

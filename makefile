@@ -1,25 +1,10 @@
 SAMDIR=~/samtools/
+LATEXDIR=latex/
 GCC=g++
 
 .PHONY: all
 
-all: sjcount 
-
-EXPORT = sjcount-1.1
-
-export:
-	mkdir $(EXPORT)/
-	cp -f *.c $(EXPORT)/
-	cp -f *.h $(EXPORT)/
-	cp -f *.sh $(EXPORT)/
-	cp -f README $(EXPORT)/
-	cp -f VERSION $(EXPORT)/
-	cp -f LICENCE $(EXPORT)/
-	cp makefile $(EXPORT)/
-	tar -cf $(EXPORT).tar $(EXPORT)/
-	gzip $(EXPORT).tar
-	rm -f -r $(EXPORT)/
-	mv $(EXPORT).tar.gz ..
+all: sjcount ${LATEXDIR}sjcount.pdf
 
 $(SAMDIR)libbam.a:
 	# You need to install samtools
@@ -34,6 +19,9 @@ progressbar.o:	progressbar.c progressbar.h
 
 sjcount : sjcount.c progressbar.o $(SAMDIR)libbam.a
 	$(GCC) -I $(SAMDIR) sjcount.c progressbar.o $(SAMDIR)libbam.a -lz -o sjcount
+
+${LATEXDIR}sjcount.pdf : ${LATEXDIR}sjcount.tex
+	pdflatex -output-directory=${LATEXDIR} ${LATEXDIR}sjcount.tex
 
 clean:
 	rm -f -r progressbar.o sjcount
