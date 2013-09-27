@@ -434,7 +434,7 @@ int main(int argc,char* argv[]) {
 	    while(qtr != NULL && qtr->pos < end) {
 		int bin = (int)(qtr->pos - beg)/binsize;
 		if(bin >= nbins) bin = nbins -1;
-		if(qtr->pos > beg + margin && qtr->pos < end - margin) qtr->count[mapped_strand][bin]++;
+		if(qtr->pos > beg + margin && qtr->pos < end - margin - 1 ) qtr->count[mapped_strand][bin]++;
 		qtr = qtr->next;
 	    }
 	}
