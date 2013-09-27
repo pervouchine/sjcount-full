@@ -63,7 +63,7 @@ Options:
 
 	-maxlen upper limit on intron length, 0 = no limit (default=0)
 	-minlen lower limit on intron length, 0 = no limit (default=0)
-	-margin length, minimum number of flanking nucleotides in the read in order to support SJ or EB, (default=0)
+	-margin length, minimum number of flanking nucleotides in order to support SJ or EB, (default=0)
 	-read1 0/1, reverse complement read1 no/yes (default=0)
 	-read2 0/1, reverse complement read2 no/yes (default=0)
 	-binsize size of the overhang bin, (default=+INFTY)

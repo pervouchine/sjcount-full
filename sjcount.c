@@ -170,7 +170,7 @@ int main(int argc,char* argv[]) {
             fprintf(stderr, "Options:\n");
             fprintf(stderr, "\t-maxlen upper limit on intron length, 0 = no limit (default=%i)\n",max_intron_length);
             fprintf(stderr, "\t-minlen lower limit on intron length, 0 = no limit (default=%i)\n",min_intron_length);
-            fprintf(stderr, "\t-margin length, minimum number of flanking nucleotides in the read in order to support SJ or EB, (default=%i)\n",margin);
+            fprintf(stderr, "\t-margin length, minimum number of flanking nucleotides to support SJ or EB, (default=%i)\n",margin);
             fprintf(stderr, "\t-read1 0/1, reverse complement read1 no/yes (default=%i)\n",rev_compl[0]);
             fprintf(stderr, "\t-read2 0/1, reverse complement read2 no/yes (default=%i)\n",rev_compl[1]);
             fprintf(stderr, "\t-binsize size of the overhang bin, (default=+INFTY)\n");
