@@ -3,7 +3,7 @@ GCC=g++
 
 .PHONY: all
 
-all: sjcount sjcount_nobins
+all: sjcount 
 
 EXPORT = sjcount-1.1
 
@@ -35,9 +35,6 @@ progressbar.o:	progressbar.c progressbar.h
 sjcount : sjcount.c progressbar.o $(SAMDIR)libbam.a
 	$(GCC) -I $(SAMDIR) sjcount.c progressbar.o $(SAMDIR)libbam.a -lz -o sjcount
 
-sjcount_nobins : sjcount_nobins.c progressbar.o $(SAMDIR)libbam.a
-	$(GCC) -I $(SAMDIR) sjcount_nobins.c progressbar.o $(SAMDIR)libbam.a -lz -o sjcount_nobins
-
 clean:
-	rm -f -r progressbar.o sjcount sjcount_nobins
+	rm -f -r progressbar.o sjcount
 

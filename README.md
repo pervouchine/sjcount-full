@@ -25,7 +25,7 @@ vesrion of bam2ssj (see https://github.com/pervouchine/bam2ssj)
 
 ============================================================================
 
-INSTALLATION INSTRUCTIONS:
+INSTALLATION
 
 To install, type 'make all'
 
@@ -44,10 +44,10 @@ NOTE that
 
 2.	Some users get error messages even when compiling sjcount with a correct SAMDIR path, something like
 
-	/centos6/samtools-9.3.2013/libbam.a(bgzf.o): In function `mt_destroy':
-	/centos6/samtools-9.3.2013/bgzf.c:458: undefined reference to `pthread_join'
-	/centos6/samtools-9.3.2013/libbam.a(bgzf.o): In function `bgzf_mt':
-	/centos6/samtools-9.3.2013/bgzf.c:445: undefined reference to `pthread_create'
+	/centos6/samtools-9.3.2013/libbam.a(bgzf.o): In function `mt_destroy`:
+	/centos6/samtools-9.3.2013/bgzf.c:458: undefined reference to `pthread_join`
+	/centos6/samtools-9.3.2013/libbam.a(bgzf.o): In function `bgzf_mt`:
+	/centos6/samtools-9.3.2013/bgzf.c:445: undefined reference to `pthread_create`
 
 This error has to do with big zip libraries, not with samtools
 

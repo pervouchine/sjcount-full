@@ -26,10 +26,10 @@
 
 #define MAXFILEBUFFLENGTH 1000
 #define ARRAY_MARGIN 2
+#define INFTY 65535
 
 int nbins   = 1;
-int binsize = 100;
-const int STRAND[2] = {1, -1};
+int binsize = INFTY;
 
 class site {
   public:
@@ -123,9 +123,9 @@ int main(int argc,char* argv[]) {
     int flag;
 
     int max_intron_length = 0;
-    int min_intron_length = 50;
-    int rev_compl[2] = {1,0};
-    int margin = 4;
+    int min_intron_length = 0;
+    int rev_compl[2] = {0,0};
+    int margin = 0;
     int limit_counts = 0;
     int verbose = 1;
 
@@ -138,9 +138,10 @@ int main(int argc,char* argv[]) {
     timestamp = time(NULL);
 
     if(argc==1) {
-        fprintf(stderr, "This utility counts splice junctions and reads covering exon boundaries; annotation-agnostic version\n");
+        fprintf(stderr, "This utility counts split reads supporting splice junctions and continuous reads covering exon/intron boundaries; annotation-agnostic version\n");
         fprintf(stderr, "%s -bam <bam_file> [-ssj <junctions_output>] [-ssc <boundaries_output>] [-log <log_file>] ",argv[0]);
-	fprintf(stderr, "[-maxlen <max_intron_length>] [-minlen <min_intron_length>] [-margin <length>] [-v suppress verbose output] [-read1 0/1] [-read2 0/1]\n");
+	fprintf(stderr, "[-maxlen <max_intron_length>] [-minlen <min_intron_length>] [-margin <length>] [-read1 0/1] [-read2 0/1] ");
+        fprintf(stderr, "[-nbins <number_of_bins>] [-binsize <bin_size>] [-lim <number_of_lines>] [-quiet]\n");
         fprintf(stderr, "Type %s -h for more info\n",argv[0]);
         exit(1);
     }
@@ -162,23 +163,24 @@ int main(int argc,char* argv[]) {
 	if(strcmp(argv[i], "-nbins")   == 0) sscanf(argv[++i], "%i", &nbins);
         if(strcmp(argv[i], "-binsize") == 0) sscanf(argv[++i], "%i", &binsize);
 
-	if(strcmp(argv[i], "-v") == 0) verbose = 0;
+	if(strcmp(argv[i], "-quiet") == 0) verbose = 0;
 
         if(strcmp(argv[i], "-h") ==0 ) {
-            fprintf(stderr, "Input:  (1) sorted BAM file\n");
+            fprintf(stderr, "Input:  a sorted BAM file with a header\n");
             fprintf(stderr, "Options:\n");
-            fprintf(stderr, "\t-maxlen <upper limit on intron length>; 0 = no limit (default=%i)\n",max_intron_length);
-            fprintf(stderr, "\t-minlen <lower limit on intron length>; 0 = no limit (default=%i)\n",min_intron_length);
-            fprintf(stderr, "\t-margin <length> minimum number of flanking nucleotides in the read in order to support SJ or EB, (default=%i)\n",margin);
+            fprintf(stderr, "\t-maxlen <upper limit on intron length>, 0 = no limit (default=%i)\n",max_intron_length);
+            fprintf(stderr, "\t-minlen <lower limit on intron length>, 0 = no limit (default=%i)\n",min_intron_length);
+            fprintf(stderr, "\t-margin <length>, minimum number of flanking nucleotides in the read in order to support SJ or EB, (default=%i)\n",margin);
             fprintf(stderr, "\t-read1 0/1, reverse complement read1 no/yes (default=%i)\n",rev_compl[0]);
             fprintf(stderr, "\t-read2 0/1, reverse complement read2 no/yes (default=%i)\n",rev_compl[1]);
-            fprintf(stderr, "\t-binsize <size of the overhang bin>, (default=%i)\n", binsize);
+            fprintf(stderr, "\t-binsize <size of the overhang bin>, (default=+INFTY)\n");
 	    fprintf(stderr, "\t-nbins <number of overhang bins>, (default=%i)\n", nbins);
 	    fprintf(stderr, "\t-lim <nreads> stop after nreads, (default=no limit)\n");
-            fprintf(stderr, "Output: (1) Junction counts, tab-delimited  (default=stdout)\n");
-            fprintf(stderr, "\tColumns are: chr, begin, end, counts (+strand), counts(-strand)\n");
-            fprintf(stderr, "Output: (2) Boundary counts, tab-delimited  (default=stdout)\n");
-            fprintf(stderr, "\tColumns are: chr, position, counts (+strand), counts(-strand)\n");
+	    fprintf(stderr, "\t-quiet, suppress verbose output\n\n"); 
+            fprintf(stderr, "Output: (1) Splice junction counts, tab-delimited  (default=stdout)\n");
+            fprintf(stderr, "\tColumns are: chr, begin, end, offset, count (+), count (-)\n");
+            fprintf(stderr, "Output: (2) Splice boundary counts, tab-delimited  (default=none)\n");
+            fprintf(stderr, "\tColumns are: chr, position, count (+), count (-)\n");
             exit(1);
         }
 
@@ -239,6 +241,11 @@ int main(int argc,char* argv[]) {
     for(s = 0; s < 2; s++) {
 	if(rev_compl[s]) fprintf(log_file,"[Warning: will take reverse complement of read %i]\n", s+1);
     }
+
+    if(binsize<INFTY) {
+        fprintf(log_file,"[Warning: reads will be binned by exonic overhang, binsize=%int, number of bins=%i]\n", binsize, nbins);
+    }
+
 
 
     //*****************************************************************************************************************************//
@@ -331,9 +338,9 @@ int main(int argc,char* argv[]) {
 	while(ptr != NULL) {
 	    site* qtr = ptr->partner;
 	    while(qtr != NULL) {
-        	for(j=0; j < 2; j++) {
+		for(j=0; j<2; j++) {
             	    for(k = 0; k < nbins; k++) { 
-			if(qtr->count[j][k]>0) fprintf(ssj_file, "%s\t%i\t%i\t%i\t%i\t%i\n", header->target_name[i], ptr->pos, qtr->pos, STRAND[j], k, qtr->count[j][k]);
+		    	if(qtr->count[j][k] > 0) fprintf(ssj_file, "%s\t%i\t%i\t%i\t%i\t%i\n", header->target_name[i], ptr->pos, qtr->pos, j, k, qtr->count[j][k]);
 		    }
 		}
 		qtr = qtr->next;
@@ -361,7 +368,11 @@ int main(int argc,char* argv[]) {
     for(i = 0; i < header->n_targets; i++) {
         site *qtr = root_site[i];
         while(qtr != NULL) {
-	    qtr->count[0][0] = qtr->count[1][0] = 0;
+	    for(j=0; j<2; j++) {
+            	for(k = 0; k < nbins; k++) {
+		    qtr->count[j][k] = 0;
+		}
+	    }
             qtr = qtr->next;
         }
 	curr_site[i] = &root_site[i];
@@ -419,7 +430,9 @@ int main(int argc,char* argv[]) {
 	if(flag) {
 	    site *qtr = (*curr_site[ref_id]);
 	    while(qtr != NULL && qtr->pos < end) {
-		if(qtr->pos >= beg + margin - 1 && qtr->pos <= end - margin + 1 ) qtr->count[mapped_strand][0]++;
+		int bin = (int)(qtr->pos - beg)/binsize;
+		if(bin >= nbins) bin = nbins -1;
+		if(qtr->pos > beg + margin && qtr->pos < end - margin) qtr->count[mapped_strand][bin]++;
 		qtr = qtr->next;
 	    }
 	}
@@ -432,7 +445,11 @@ int main(int argc,char* argv[]) {
     for(i = 0; i < header->n_targets; i++) {
         site *qtr = root_site[i];
         while(qtr != NULL) {
-            fprintf(ssc_file, "%s\t%i\t%i\t%i\n", header->target_name[i], qtr->pos, qtr->count[0][0], qtr->count[1][0]);
+	    for(j=0; j<2; j++) { 
+            	for(k = 0; k < nbins; k++) {
+            	    if(qtr->count[j][k] > 0) fprintf(ssc_file, "%s\t%i\t%i\t%i\t%i\n", header->target_name[i], qtr->pos, j, k, qtr->count[j][k]);
+		}
+	    }
             qtr = qtr->next;
         }
     }
