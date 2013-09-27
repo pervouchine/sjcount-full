@@ -60,6 +60,7 @@ USAGE
 Input:   a (sorted) BAM file
 
 Options:
+
 	-maxlen upper limit on intron length, 0 = no limit (default=0)
 	-minlen lower limit on intron length, 0 = no limit (default=0)
 	-margin length, minimum number of flanking nucleotides in the read in order to support SJ or EB, (default=0)
@@ -71,6 +72,7 @@ Options:
 	-quiet, suppress verbose output
 
 Output:
+
 	-ssj: Splice junction counts, tab-delimited  (default = stdout)
 	Columns are: chr, begin, end, offset, count (+), count (-)
 	-ssc: Splice boundary counts, tab-delimited  (default = none)
