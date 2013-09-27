@@ -31,6 +31,8 @@
 int nbins   = 1;
 int binsize = INFTY;
 
+const int STRAND[2] = {1, -1};
+
 class site {
   public:
     int pos;
@@ -340,7 +342,7 @@ int main(int argc,char* argv[]) {
 	    while(qtr != NULL) {
 		for(j=0; j<2; j++) {
             	    for(k = 0; k < nbins; k++) { 
-		    	if(qtr->count[j][k] > 0) fprintf(ssj_file, "%s\t%i\t%i\t%i\t%i\t%i\n", header->target_name[i], ptr->pos, qtr->pos, j, k, qtr->count[j][k]);
+		    	if(qtr->count[j][k] > 0) fprintf(ssj_file, "%s\t%i\t%i\t%i\t%i\t%i\n", header->target_name[i], ptr->pos, qtr->pos, STRAND[j], k, qtr->count[j][k]);
 		    }
 		}
 		qtr = qtr->next;
@@ -447,7 +449,7 @@ int main(int argc,char* argv[]) {
         while(qtr != NULL) {
 	    for(j=0; j<2; j++) { 
             	for(k = 0; k < nbins; k++) {
-            	    if(qtr->count[j][k] > 0) fprintf(ssc_file, "%s\t%i\t%i\t%i\t%i\n", header->target_name[i], qtr->pos, j, k, qtr->count[j][k]);
+            	    if(qtr->count[j][k] > 0) fprintf(ssc_file, "%s\t%i\t%i\t%i\t%i\n", header->target_name[i], qtr->pos, STRAND[j], k, qtr->count[j][k]);
 		}
 	    }
             qtr = qtr->next;

@@ -5,6 +5,7 @@ $BAM_FREAD1 = 0x40;
 $BAM_FREAD2 = 0x80;
 $BAM_FREVERSE = 0x10;
 $INFTY = 65535;
+@STRAND = (1, -1);
 
 #    print STDERR "This is a line-based utility for extracting splice junctions from SAM files\n";
 #    print STDERR "$0 [-maxlen <max_intron_length>] [-minlen <min_intron_length>] [-margin <length>] [-read1 0/1] [-read2 0/1] [-binsize <bin_size>] [-lim <number_of_lines>]\n";
@@ -52,7 +53,7 @@ while($line=<STDIN>) {
 			next if($array[$i]->[0] < $minlen && $minlen > 0);
 			next if($array[$i]->[0] > $maxlen && $maxlen > 0);
 			$offset = int(($pos - $prev)/$binsize);
-			print join("\t", $ref, $pos - 1, $pos + $array[$i]->[0], $strand, $offset),"\n";
+			print join("\t", $ref, $pos - 1, $pos + $array[$i]->[0], $STRAND[$strand], $offset),"\n";
 			$pos += $array[$i]->[0];
 			$prev = $pos;
 		     }
