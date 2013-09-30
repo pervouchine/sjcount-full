@@ -29,13 +29,16 @@ See README.md file for installation instructions. {\em sjcount} is used with the
 Samtools package Version: 0.1.18-dev (r982:313) is compartible (and likely so are oder versions).
 
 \begin{verbatim}
-sjcount -bam bam_file [-ssj junctions_output] [-ssc boundaries_output] [-log log_file] 
+sjcount -bam bam_file [-ssj junctions_output] [-ssc boundary_output]
        [-maxlen max_intron_length] [-minlen min_intron_length] [-margin length] 
        [-read1 0|1] [-read2 0|1] [-nbins number_of_bins] [-binsize bin_size] 
        [-lim number_of_lines] [-quiet]
 \end{verbatim}
 where
 \begin{itemize}
+\item {\bf bam\_file} is a sorted input BAM file with a header
+\item {\bf junctions\_output} is the output file with junction counts
+\item {\bf boundary\_output} is the output file with boundary counts
 \item {\bf maxlen} upper limit on intron length, 0 = no limit (default=0)
 \item {\bf minlen} lower limit on intron length, 0 = no limit (default=0)
 \item {\bf margin} length, see below, (default=0)
@@ -47,18 +50,26 @@ where
 \item {\bf quiet} -- suppress verbose output
 \end{itemize}
 
-The input to {\em sjcount} is a sorted BAM file with a header. The output consists of two files.
-First, a tab-delimited .ssj file is produced. It contains counts of splice junctions, taking into 
-account the strand information and also start and stop positions. Second, it produces a tab-delimited
-.ssc file containing counts of continuous (non-split reads) which *overlap* splice sites defined by 
-splice junctions. The second file is optional and is used to compute the completness of splicing 
-index~\cite{}.
+The output consists of two parts. First, a tab-delimited file containing splice junction counts is produced.
+Its format is as follows
+\begin{verbatim}
+chr1    100	200	-1	10	25
+chr1    100     200     -1      11      12
+...	...	...	...	...	...
+\end{verbatim}
+where the first column contains chromosome id, the second and the third columns contain positions of terminal exonic 
+nucleotides which define the splice junction, the fourth column contains strand (1 or -1), the fifth column is the 
+overhang (see definitions below), and the last column is the respective number of reads with these properties.
+
+The secons output is a tab-delimited  file  which contains counts of continuous (non-split reads) which {\em overlap}
+splice sites of splice junctions tabulated in the previous step. This second file is optional and is used to compute 
+the completness of splicing index~\cite{pmid23172860, pmid22955974}.
 
 \section{Definitions}
 
-By definition, we will say that we observe a splice junction whenever we encounter 'N' symbol in the CIGAR 
-attribute of a SAM alignment. For instance, the alignment shown in Figure~\ref{fig::01} below gives rise to 
-two splice junctions, $\SJ_1$ and $\SJ_2$.
+By definition, we say that we observe a splice junction each we see an 'N' symbol in the CIGAR attribute of some
+SAM alignment. For instance, the alignment shown in Figure~\ref{fig::01} below gives rise to two splice junctions, 
+denoted by $\SJ_1$ and $\SJ_2$.
 %
 \begin{figure}[h]
 \footnotesize
@@ -79,14 +90,16 @@ Query   123   Ref   14    255    5M1I5M2D6M20N5M1D7M13N3M1S 1234
 \caption{An example alignment and its CIGAR attribute\label{fig::01}}
 \end{figure}
 %
-We have a convention that coordinates of splice junctions always use terminal exonic nucleotides, i.e., $\SJ_1$ is 
-$\rm Ref\_31\_52$ and $\SJ2$ is $\rm Ref\_64\_78$. We denote the length of the intron by $l(\SJ)$, i.e. $l(\SJ_1)=52-31-1=20$ 
-and $l(\SJ_2)=78-64-1=13$. Intron length is always equal to the corresponding 'N' number in the CIGAR attribute.
+We keep the convention that coordinates of splice junctions always refer to terminal exonic nucleotides, 
+i.e., $\SJ_1$ is $\rm Ref\_31\_52$ and $\SJ2$ is $\rm Ref\_64\_78$. We also denote the length of the 
+intron by $l(\SJ)$, i.e. $l(\SJ_1)=52-31-1=20$ and $l(\SJ_2)=78-64-1=13$. Intron length is always equal 
+to the corresponding 'N' number in the CIGAR attribute.
 
-With each splice junctions we associate four numbers: $m_u$ ($m_d$) --- the number of \underline{m}atching nucleotides 
-immediately upstream (downstream) of the junction, and $v_u$ ($v_d$) --- the length in the reference of the aligned region,
-also called o\underline{v}erhang, including M/I/D operations and located immediately upstream (downstream) of the junction.
-in Figure~\ref{fig::01} we have $m_u(\SJ_1)=6$, $m_d(\SJ_1)=5$, $v_u(\SJ_1)=31-14+1=18$, $v_d(\SJ_1)=64-52+1=13$ and
+Each splice junctions is associated with four numbers: $m_u$ ($m_d$) --- the number of \underline{m}atching 
+nucleotides immediately upstream (downstream) of the junction, and $v_u$ ($v_d$) --- the length in the 
+reference of the aligned region, also called o\underline{v}erhang, which includes M/I/D CIGAR operations 
+and is located immediately upstream (downstream) of the junction. In Figure~\ref{fig::01} we have 
+$m_u(\SJ_1)=6$, $m_d(\SJ_1)=5$, $v_u(\SJ_1)=31-14+1=18$, $v_d(\SJ_1)=64-52+1=13$ and
 $m_u(\SJ_2)=7$, $m_d(\SJ_2)=3$, $v_u(\SJ_2)=64-52+1=13$, $v_d(\SJ_2)=80-78+1=3$.
 
 For each splice junction we require that
@@ -95,8 +108,9 @@ For each splice junction we require that
 \item $m_u\ge \rm\bf margin$ and $m_d\ge \rm\bf margin$
 \end{enumerate}
 
-In addition to the coordinates of a junction, the upstream overhang $v_u(\SJ)$ is also taken into account to 
-distinguish staggered and non-staggered reads (Figure~\ref{fig::02}).
+In addition to junction coordinates, the overhang $v_u(\SJ)$ can also be used to correct for artifactually large read 
+counts that arise in certain positions~\cite{pmid22537040}. In Figure~\ref{fig::02} we show six split reads supporting 
+the same splice junction with overhangs 14 (Q1), 12 (Q2--Q4), and 8 (Q5--Q6).
 %
 \begin{figure}[h]
 \footnotesize
@@ -114,29 +128,32 @@ Q4              ACGGCATAGGAG....................ATCTAC
 Q5                  CATAGGAG....................ATCTACAAAA
 Q6                  CATAGGAG....................ATCTACAAAA
 \end{verbatim}
-\caption{Counting convention\label{fig::02}}
+\caption{Split reads support the same splice junction with different overhangs\label{fig::02}}
 \end{figure}
-%
 
-This is done as follows. For each instance of a splice junction we increment the corresponding counter for the
-bin defined by $d=floor(v_u/binsize)$. For example, in the default settings $binsize=+\infty$. Then, $d=0$
-for all supporting reads, regardless of their overhang ($v_u=14$ for Q1, $v_u=12$ for Q2--4, and $v_u=8$ for Q5--6). 
-Therefore, there is only one counter to increment, and the result will be the ``collapsed'' counts. The output 
-corresponding to Figure~\ref{fig::02} will be
+The quantification of abundance is done as follows. For each splice junction (pair of coordinates) 
+we initialize and keep $nbins$ separate counters. For each instance of a splice junction we increment 
+the counter corresponding to the overhang bin defined by $d=floor(v_u/binsize)$.
+
+For example, in the default settings we have $binsize=+\infty$. This means that $d=0$ for all supporting 
+reads, regardless of their overhang ($v_u=14$ for Q1, $v_u=12$ for Q2--4, and $v_u=8$ for Q5--6 in 
+Figure~\ref{fig::02}). Therefore, there is only one counter to increment, and the result will be the 
+``collapsed'' counts. The output corresponding to Figure~\ref{fig::02} will then be
 \begin{verbatim}
 Ref     31      52      1       0       6
 \end{verbatim}
 
-By contrast, to count split reads taking into account the overhang information, one should set $binsize=1$ 
-(and specify $nbins$ because the program doesn't know the range of possible offsets). There will be a separate 
-counter for each offset and the output corresponding to Figure~\ref{fig::02} will then look like
+By contrast, to take into account the overhang information, one should set $binsize=1$ (and also specify $nbins$ 
+because the program doesn't know the range of possible overhang values). There will be a separate counter for each 
+offset $d$ and the output corresponding to Figure~\ref{fig::02} will be
 \begin{verbatim}
 Ref     31      52      1       8        2
 Ref     31      52      1       12       3
 Ref     31      52      1       14       1
 \end{verbatim}
-
-
+Note that when aggregated by the fifth column, the number of counts coincides with the collapsed counts.
+\bibliography{sjcount}
+\bibliographystyle{abbrv}
 
 \end{document}
 
