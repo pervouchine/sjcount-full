@@ -1,4 +1,6 @@
-Version 1.1
+Version 1.1	The output format has changed compared to previous versions. Previously the output format was chr, 
+		beg, end, count+, count-. Now the format is chr, beg, end, strand, offset, count. Also, the offset
+		has been added compared to previous versions and to bam2ssj. 
 
 Sep 27, 2013	1) A perl script sam2sj.pl is added to the package. 
 		This script is line-based and has the same thresholds as sjcount.

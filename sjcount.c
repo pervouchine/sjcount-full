@@ -130,6 +130,7 @@ int main(int argc,char* argv[]) {
     int margin = 0;
     int limit_counts = 0;
     int verbose = 1;
+    int stranded = 1;
 
     int n_reads = 0;
 
@@ -166,6 +167,7 @@ int main(int argc,char* argv[]) {
         if(strcmp(argv[i], "-binsize") == 0) sscanf(argv[++i], "%i", &binsize);
 
 	if(strcmp(argv[i], "-quiet") == 0) verbose = 0;
+	if(strcmp(argv[i], "-unstranded") == 0) stranded = 0;
 
         if(strcmp(argv[i], "-h") ==0 ) {
             fprintf(stderr, "Input:  a sorted BAM file with a header\n");
@@ -178,6 +180,7 @@ int main(int argc,char* argv[]) {
             fprintf(stderr, "\t-binsize size of the overhang bin, (default=+INFTY)\n");
 	    fprintf(stderr, "\t-nbins number of overhang bins, (default=%i)\n", nbins);
 	    fprintf(stderr, "\t-lim nreads stop after nreads, (default=no limit)\n");
+	    fprintf(stderr, "\t-unstranded, force strand=0\n\n");
 	    fprintf(stderr, "\t-quiet, suppress verbose output\n\n"); 
             fprintf(stderr, "Output:\t-ssj: Splice Junction counts, tab-delimited  (default=stdout)\n");
             fprintf(stderr, "\tColumns are: chr, begin, end, strand, offset, count\n");
@@ -289,6 +292,7 @@ int main(int argc,char* argv[]) {
 	s = ((c->flag & BAM_FREVERSE)>0);
 
 	mapped_strand = (c->flag & BAM_FREAD1) ? (s + rev_compl[0]) & 1 : (s + rev_compl[1]) & 1;
+	mapped_strand*= stranded;
 
 	pos = beg = c->pos + 1;
 
@@ -342,7 +346,7 @@ int main(int argc,char* argv[]) {
 	    while(qtr != NULL) {
 		for(j=0; j<2; j++) {
             	    for(k = 0; k < nbins; k++) { 
-		    	if(qtr->count[j][k] > 0) fprintf(ssj_file, "%s\t%i\t%i\t%i\t%i\t%i\n", header->target_name[i], ptr->pos, qtr->pos, STRAND[j], k, qtr->count[j][k]);
+		    	if(qtr->count[j][k] > 0) fprintf(ssj_file, "%s\t%i\t%i\t%i\t%i\t%i\n", header->target_name[i], ptr->pos, qtr->pos, STRAND[j]*stranded, k, qtr->count[j][k]);
 		    }
 		}
 		qtr = qtr->next;
@@ -396,6 +400,7 @@ int main(int argc,char* argv[]) {
         s = ((c->flag & BAM_FREVERSE)>0);
 
         mapped_strand = (c->flag & BAM_FREAD1) ? (s + rev_compl[0]) & 1 : (s + rev_compl[1]) & 1;
+        mapped_strand*= stranded;
 
         beg = c->pos + 1;
 
@@ -449,7 +454,7 @@ int main(int argc,char* argv[]) {
         while(qtr != NULL) {
 	    for(j=0; j<2; j++) { 
             	for(k = 0; k < nbins; k++) {
-            	    if(qtr->count[j][k] > 0) fprintf(ssc_file, "%s\t%i\t%i\t%i\t%i\n", header->target_name[i], qtr->pos, STRAND[j], k, qtr->count[j][k]);
+            	    if(qtr->count[j][k] > 0) fprintf(ssc_file, "%s\t%i\t%i\t%i\t%i\n", header->target_name[i], qtr->pos, STRAND[j]*stranded, k, qtr->count[j][k]);
 		}
 	    }
             qtr = qtr->next;

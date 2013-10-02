@@ -69,6 +69,7 @@ Options:
 	-binsize size of the overhang bin, (default=+INFTY)
 	-nbins number of overhang bins, (default=1)
 	-lim nreads stop after nreads, (default=no limit)
+	-unstranded, force strand=0
 	-quiet, suppress verbose output
 
 Output:
