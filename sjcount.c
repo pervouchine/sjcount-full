@@ -180,7 +180,7 @@ int main(int argc,char* argv[]) {
             fprintf(stderr, "\t-binsize size of the overhang bin, (default=+INFTY)\n");
 	    fprintf(stderr, "\t-nbins number of overhang bins, (default=%i)\n", nbins);
 	    fprintf(stderr, "\t-lim nreads stop after nreads, (default=no limit)\n");
-	    fprintf(stderr, "\t-unstranded, force strand=0\n\n");
+	    fprintf(stderr, "\t-unstranded, force strand=0\n");
 	    fprintf(stderr, "\t-quiet, suppress verbose output\n\n"); 
             fprintf(stderr, "Output:\t-ssj: Splice Junction counts, tab-delimited  (default=stdout)\n");
             fprintf(stderr, "\tColumns are: chr, begin, end, strand, offset, count\n");
