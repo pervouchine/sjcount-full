@@ -141,8 +141,8 @@ int main(int argc,char* argv[]) {
     timestamp = time(NULL);
 
     if(argc==1) {
-        fprintf(stderr, "This utility counts split reads supporting splice junctions and continuous reads covering exon/intron boundaries; annotation-agnostic version\n");
-        fprintf(stderr, "%s -bam bam_file [-ssj junctions_output] [-ssc boundaries_output] [-log log_file] ",argv[0]);
+	fprintf(stderr, "sjcount (v. 1.12) counts split reads supporting splice junctions and continuous (not split) reads covering exon boundaries\n");
+        fprintf(stderr, "Usage: %s -bam bam_file [-ssj junctions_output] [-ssc boundaries_output] [-log log_file] ",argv[0]);
 	fprintf(stderr, "[-maxlen max_intron_length] [-minlen min_intron_length] [-margin length] [-read1 0|1] [-read2 0|1] ");
         fprintf(stderr, "[-nbins number_of_bins] [-binsize bin_size] [-lim number_of_lines] [-quiet]\n");
         fprintf(stderr, "Type %s -h for more info\n",argv[0]);
