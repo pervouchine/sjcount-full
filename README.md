@@ -82,13 +82,8 @@ Output:
 ============================================================================
 
 DETAILS
+	See documentation in latex/sjcount.pdf
 
-	Each 'N' in the CIGAR string defines a splice junction. The lengths of the continuous portions of the upstream 
-	and downstream alignment (M, match only!) have to be at least <margin> nucleotides. The break has to be between
-	<min_intron_length> and <max_intron_length>. Next, each 'N' in the CIGAR has a continuous portion upstream from 
-	the start of the alignment or previous N (i.e., only M/I/D). It is called 'offset'. Offset is used to bin reads 
-	by the formula {bin = (int) offset/binsize}. The max value of 'bin' is enforced to be nbins - 1. By default, 
-	nbins = 1, i.e., all SJ counts fall into one bin.
  
 
 
