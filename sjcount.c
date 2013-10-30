@@ -119,14 +119,14 @@ int main(int argc,char* argv[]) {
 
     char buff[MAXFILEBUFFLENGTH];
     char chr[MAXFILEBUFFLENGTH];
-    int beg, end, pos, prev, offset; 
+    int beg, end, pos, offset, increm; 
     int ref_id, ref_id_prev;
     int read_type, mapped_strand;
     int flag;
 
     int max_intron_length = 0;
     int min_intron_length = 0;
-    int rev_compl[2] = {0,0};
+    int rev_compl[2] = {1,0};
     int margin = 0;
     int limit_counts = 0;
     int verbose = 1;
@@ -306,29 +306,31 @@ int main(int argc,char* argv[]) {
 
 	for(;k<beg;k++) progressbar(k, header->target_len[ref_id], header->target_name[ref_id], verbose);
 
-	prev = pos;
+	offset = 0;
         for(i = 0; i < c->n_cigar; i++) {
-	    offset = cigar[i] >> 4;
+	    increm = cigar[i] >> 4;
 	    switch(cigar[i] & 0x0F) {
-	    	case BAM_CMATCH: 	pos += offset;  // match to the reference
+	    	case BAM_CMATCH: 	pos += increm;  	// match to the reference
+					offset += increm;	//
 				 	break;
-		case BAM_CINS:		pos += 0;	// insertion to the reference, pointer stays unchanged
+		case BAM_CINS:		pos += 0;		// insertion to the reference, pos stays unchanged
+					offset += increm;	//			       offset increases
 					break;
-		case BAM_CDEL:		pos += offset;	// deletion from the reference (technically the same as 'N') pointer moves
+		case BAM_CDEL:		pos += increm;		// deletion from the reference (technically the same as 'N') pointer moves
+					offset += 0;		// offset doesn't
                                         break;
                 case BAM_CREF_SKIP: 
 					if(i==0 || i==c->n_cigar) break;
 					if(cigar[i-1] & 0x0F !=BAM_CMATCH || cigar[i+1] & 0x0F != BAM_CMATCH) break;
 					if((cigar[i-1] >> 4) < margin || (cigar[i+1] >> 4) < margin) break;
-					if(offset < min_intron_length && min_intron_length > 0) continue;
-					if(offset > max_intron_length && max_intron_length > 0) break;
-					update_jnxn(curr_junction[ref_id], pos - 1, 	pos + offset, 	mapped_strand, pos - prev, 1);
-					update_site(curr_site[ref_id], 	   pos - 1, 			mapped_strand, pos - prev, 0);
-					update_site(curr_site[ref_id],     pos + offset,		mapped_strand, pos - prev, 0);
-					pos += offset;
-					prev = pos;
+					if(increm < min_intron_length && min_intron_length > 0) continue;
+					if(increm > max_intron_length && max_intron_length > 0) break;
+					update_jnxn(curr_junction[ref_id], pos - 1, 	pos + increm, 	mapped_strand, offset, 1);
+					update_site(curr_site[ref_id], 	   pos - 1, 			mapped_strand, offset, 0);
+					update_site(curr_site[ref_id],     pos + increm,		mapped_strand, offset, 0);
+					pos += increm;
 				 	break;
-		case BAM_CSOFT_CLIP:
+		case BAM_CSOFT_CLIP:	offset += increm;
 		case BAM_CHARD_CLIP:
 		case BAM_CPAD:
 		default:		break;
@@ -416,13 +418,13 @@ int main(int argc,char* argv[]) {
 	flag = 1;
     	pos = beg;
         for(i = 0; i < c->n_cigar; i++) {
-            offset = cigar[i] >> 4;
+            increm = cigar[i] >> 4;
             switch(cigar[i] & 0x0F) {
-                case BAM_CMATCH:        pos += offset;  // match to the reference
+                case BAM_CMATCH:        pos += increm;  // match to the reference
                                         break;
                 case BAM_CINS:          pos += 0;       // insertion to the reference, pointer stays unchanged
                                         break;
-                case BAM_CDEL:          pos += offset;  // deletion from the reference (technically the same as 'N') pointer moves
+                case BAM_CDEL:          pos += increm;  // deletion from the reference (technically the same as 'N') pointer moves
                                         break;
                 case BAM_CREF_SKIP:
                 case BAM_CSOFT_CLIP:

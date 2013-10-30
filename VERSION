@@ -11,5 +11,9 @@ Version 1.11	Sep 27, 2013
 
 Version 1.12	Oct 2, 2013
 		1. -unstranded option has been added (basically reduces the number of output lines by 2)
+
+Version 1.13	Oct 30,2013
+		1. The definition of the offset changed to: offset = distance (in the query) from the beginning of the read to the SJ
+		2. The default for read1 is back to 1
 		
 
