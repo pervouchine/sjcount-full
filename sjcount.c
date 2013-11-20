@@ -243,6 +243,10 @@ int main(int argc,char* argv[]) {
 	fprintf(log_file,"[Warning: read margin set to %i]\n", margin);
     }
 
+    if(stranded==0) {
+	fprintf(log_file,"[Warning: strand is ignored (forced to zero)]\n");
+    }
+
     for(s = 0; s < 2; s++) {
 	if(rev_compl[s]) fprintf(log_file,"[Warning: will take reverse complement of read %i]\n", s+1);
     }
@@ -456,7 +460,7 @@ int main(int argc,char* argv[]) {
         while(qtr != NULL) {
 	    for(j=0; j<2; j++) { 
             	for(k = 0; k < nbins; k++) {
-            	    if(qtr->count[j][k] > 0) fprintf(ssc_file, "%s\t%i\t%i\t%i\t%i\n", header->target_name[i], qtr->pos, STRAND[j]*stranded, k, qtr->count[j][k]);
+            	    if(qtr->count[j][k] > 0) fprintf(ssc_file, "%s\t%i\t%i\t%i\t%i\t%i\n", header->target_name[i], qtr->pos, qtr->pos, STRAND[j]*stranded, k, qtr->count[j][k]);
 		}
 	    }
             qtr = qtr->next;
