@@ -1,4 +1,4 @@
-SAMDIR=~/samtools/
+SAMDIR=~/software/samtools/
 LATEXDIR=latex/
 GCC=g++
 
