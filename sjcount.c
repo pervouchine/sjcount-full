@@ -96,6 +96,11 @@ void update_jnxn(junction **ptr, int beg, int end, int strand, int offset, int c
     }
 }
 
+char strand_i2c(int i) {
+    if(i>0) return('+');
+    if(i<0) return('-');
+    return('.');
+}
 
 int main(int argc,char* argv[]) {
     time_t timestamp, current_time;
@@ -143,7 +148,7 @@ int main(int argc,char* argv[]) {
     if(argc==1) {
 	fprintf(stderr, "sjcount (v. 1.12) counts split reads supporting splice junctions and continuous (not split) reads covering exon boundaries\n");
         fprintf(stderr, "Usage: %s -bam bam_file [-ssj junctions_output] [-ssc boundaries_output] [-log log_file] ",argv[0]);
-	fprintf(stderr, "[-maxlen max_intron_length] [-minlen min_intron_length] [-margin length] [-read1 0|1] [-read2 0|1] ");
+	fprintf(stderr, "[-maxlen max_intron_length] [-minlen min_intron_length] [-read1 0|1] [-read2 0|1] ");
         fprintf(stderr, "[-nbins number_of_bins] [-binsize bin_size] [-lim number_of_lines] [-quiet]\n");
         fprintf(stderr, "Type %s -h for more info\n",argv[0]);
         exit(1);
@@ -161,7 +166,7 @@ int main(int argc,char* argv[]) {
 	if(strcmp(argv[i], "-lim") == 0)    sscanf(argv[++i], "%i", &limit_counts);
 	if(strcmp(argv[i], "-minlen") == 0) sscanf(argv[++i], "%i", &min_intron_length);
 	if(strcmp(argv[i], "-maxlen") == 0) sscanf(argv[++i], "%i", &max_intron_length);
-	if(strcmp(argv[i], "-margin") == 0) sscanf(argv[++i], "%i", &margin);
+	//if(strcmp(argv[i], "-margin") == 0) sscanf(argv[++i], "%i", &margin);
 
 	if(strcmp(argv[i], "-nbins")   == 0) sscanf(argv[++i], "%i", &nbins);
         if(strcmp(argv[i], "-binsize") == 0) sscanf(argv[++i], "%i", &binsize);
@@ -174,7 +179,7 @@ int main(int argc,char* argv[]) {
             fprintf(stderr, "Options:\n");
             fprintf(stderr, "\t-maxlen upper limit on intron length, 0 = no limit (default=%i)\n",max_intron_length);
             fprintf(stderr, "\t-minlen lower limit on intron length, 0 = no limit (default=%i)\n",min_intron_length);
-            fprintf(stderr, "\t-margin length, minimum number of flanking nucleotides to support SJ or EB, (default=%i)\n",margin);
+            //fprintf(stderr, "\t-margin length, minimum number of flanking nucleotides to support SJ or EB, (default=%i)\n",margin);
             fprintf(stderr, "\t-read1 0/1, reverse complement read1 no/yes (default=%i)\n",rev_compl[0]);
             fprintf(stderr, "\t-read2 0/1, reverse complement read2 no/yes (default=%i)\n",rev_compl[1]);
             fprintf(stderr, "\t-binsize size of the overhang bin, (default=+INFTY)\n");
@@ -239,9 +244,9 @@ int main(int argc,char* argv[]) {
         fprintf(log_file,"[Warning: set min intron length=%i]\n", min_intron_length);
     }
 
-    if(margin>0) {
+    /*if(margin>0) {
 	fprintf(log_file,"[Warning: read margin set to %i]\n", margin);
-    }
+    }*/
 
     if(stranded==0) {
 	fprintf(log_file,"[Warning: strand is ignored (forced to zero)]\n");
@@ -352,7 +357,7 @@ int main(int argc,char* argv[]) {
 	    while(qtr != NULL) {
 		for(j=0; j<2; j++) {
             	    for(k = 0; k < nbins; k++) { 
-		    	if(qtr->count[j][k] > 0) fprintf(ssj_file, "%s\t%i\t%i\t%i\t%i\t%i\n", header->target_name[i], ptr->pos, qtr->pos, STRAND[j]*stranded, k, qtr->count[j][k]);
+		    	if(qtr->count[j][k] > 0) fprintf(ssj_file, "%s\t%i\t%i\t%c\t%i\t%i\n", header->target_name[i], ptr->pos, qtr->pos, strand_i2c(STRAND[j]*stranded), k, qtr->count[j][k]);
 		    }
 		}
 		qtr = qtr->next;
@@ -460,7 +465,7 @@ int main(int argc,char* argv[]) {
         while(qtr != NULL) {
 	    for(j=0; j<2; j++) { 
             	for(k = 0; k < nbins; k++) {
-            	    if(qtr->count[j][k] > 0) fprintf(ssc_file, "%s\t%i\t%i\t%i\t%i\t%i\n", header->target_name[i], qtr->pos, qtr->pos, STRAND[j]*stranded, k, qtr->count[j][k]);
+            	    if(qtr->count[j][k] > 0) fprintf(ssc_file, "%s\t%i\t%i\t%c\t%i\t%i\n", header->target_name[i], qtr->pos, qtr->pos, strand_i2c(STRAND[j]*stranded), k, qtr->count[j][k]);
 		}
 	    }
             qtr = qtr->next;
