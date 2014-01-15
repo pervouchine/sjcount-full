@@ -16,7 +16,3 @@ Version 1.13	Oct 30,2013
 		1. The definition of the offset changed to: offset = distance (in the query) from the beginning of the read to the SJ
 		2. The default for read1 is back to 1
 
-Version 1.14 	Dec 2, 2013
-		1. margin deprecated
-		
-
