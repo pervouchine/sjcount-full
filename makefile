@@ -25,6 +25,8 @@ sjcount2 : sjcount2.c progressbar.o $(SAMDIR)libbam.a
 
 ${LATEXDIR}sjcount.pdf : ${LATEXDIR}sjcount.tex
 	pdflatex -output-directory=${LATEXDIR} ${LATEXDIR}sjcount.tex
+	pdflatex -output-directory=${LATEXDIR} ${LATEXDIR}sjcount.tex
+
 
 clean:
 	rm -f -r progressbar.o sjcount sjcount2
