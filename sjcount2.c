@@ -28,6 +28,8 @@
 #define ARRAY_MARGIN 2
 #define INFTY 65535
 
+const char version[100] = "v.2.14-full";
+
 int nbins   = 1;
 
 const int STRAND[2] = {1, -1};
@@ -141,7 +143,7 @@ int main(int argc,char* argv[]) {
     timestamp = time(NULL);
 
     if(argc==1) {
-	fprintf(stderr, "sjcount v.1.13 counts split reads supporting splice junctions and continuous reads that cover exon boundaries\n");
+	fprintf(stderr, "sjcount %s counts split reads supporting splice junctions and continuous reads that cover exon boundaries\n", version);
         fprintf(stderr, "Usage: %s -bam bam_file [-ssj junctions_output] [-ssc boundaries_output] [-log log_file] [-read1 0|1] [-read2 0|1] ",argv[0]);
         fprintf(stderr, "[-nbins number_of_bins] [-lim number_of_lines] [-quiet]\n");
         fprintf(stderr, "Type %s -h for more info\n\n",argv[0]);
@@ -165,6 +167,7 @@ int main(int argc,char* argv[]) {
 	if(strcmp(argv[i], "-unstranded") == 0) stranded = 0;
 
         if(strcmp(argv[i], "-h") ==0 ) {
+	    fprintf(stderr, "sjcount %s\n", version);
             fprintf(stderr, "Input:  a sorted BAM file with a header\n");
             fprintf(stderr, "Options:\n");
             fprintf(stderr, "\t-read1 0/1, reverse complement read1 no/yes (default=%i)\n",rev_compl[0]);

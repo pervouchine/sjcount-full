@@ -28,8 +28,11 @@
 #define ARRAY_MARGIN 2
 #define INFTY 65535
 
+
+const char version[100] = "v.2.14";
+
 int nbins   = 1;
-int binsize = INFTY;
+int binsize = 1;
 
 const int STRAND[2] = {1, -1};
 
@@ -146,7 +149,7 @@ int main(int argc,char* argv[]) {
     timestamp = time(NULL);
 
     if(argc==1) {
-	fprintf(stderr, "sjcount v.1.13 counts split reads supporting splice junctions and continuous reads that cover exon boundaries\n");
+	fprintf(stderr, "sjcount %s counts split reads supporting splice junctions and continuous reads that cover exon boundaries\n", version);
         fprintf(stderr, "Usage: %s -bam bam_file [-ssj junctions_output] [-ssc boundaries_output] [-log log_file] ",argv[0]);
 	fprintf(stderr, "[-maxlen max_intron_length] [-minlen min_intron_length] [-read1 0|1] [-read2 0|1] ");
         fprintf(stderr, "[-nbins number_of_bins] [-binsize bin_size] [-lim number_of_lines] [-quiet]\n");
@@ -164,9 +167,9 @@ int main(int argc,char* argv[]) {
         if(strcmp(argv[i], "-read2") == 0) sscanf(argv[++i], "%i", &rev_compl[1]);
 
 	if(strcmp(argv[i], "-lim") == 0)    sscanf(argv[++i], "%i", &limit_counts);
-	if(strcmp(argv[i], "-minlen") == 0) sscanf(argv[++i], "%i", &min_intron_length);
+/*	if(strcmp(argv[i], "-minlen") == 0) sscanf(argv[++i], "%i", &min_intron_length);
 	if(strcmp(argv[i], "-maxlen") == 0) sscanf(argv[++i], "%i", &max_intron_length);
-	if(strcmp(argv[i], "-margin") == 0) sscanf(argv[++i], "%i", &margin);
+	if(strcmp(argv[i], "-margin") == 0) sscanf(argv[++i], "%i", &margin); */
 
 	if(strcmp(argv[i], "-nbins")   == 0) sscanf(argv[++i], "%i", &nbins);
         if(strcmp(argv[i], "-binsize") == 0) sscanf(argv[++i], "%i", &binsize);
@@ -175,22 +178,23 @@ int main(int argc,char* argv[]) {
 	if(strcmp(argv[i], "-unstranded") == 0) stranded = 0;
 
         if(strcmp(argv[i], "-h") ==0 ) {
+	    fprintf(stderr, "sjcount %s\n", version);
             fprintf(stderr, "Input:  a sorted BAM file with a header\n");
             fprintf(stderr, "Options:\n");
-            fprintf(stderr, "\t-maxlen upper limit on intron length, 0 = no limit (default=%i)\n",max_intron_length);
-            fprintf(stderr, "\t-minlen lower limit on intron length, 0 = no limit (default=%i)\n",min_intron_length);
-            fprintf(stderr, "\t-margin length, minimum number of flanking nucleotides to support SJ or EB, (default=%i)\n",margin);
+            fprintf(stderr, "\tDEPRECATED: -maxlen upper limit on intron length, 0 = no limit (default=%i)\n",max_intron_length);
+            fprintf(stderr, "\tDEPRECATED: -minlen lower limit on intron length, 0 = no limit (default=%i)\n",min_intron_length);
+            fprintf(stderr, "\tDEPRECATED: -margin length, minimum number of flanking nucleotides to support SJ or EB, (default=%i)\n",margin);
             fprintf(stderr, "\t-read1 0/1, reverse complement read1 no/yes (default=%i)\n",rev_compl[0]);
             fprintf(stderr, "\t-read2 0/1, reverse complement read2 no/yes (default=%i)\n",rev_compl[1]);
-            fprintf(stderr, "\t-binsize size of the overhang bin, (default=+INFTY)\n");
-	    fprintf(stderr, "\t-nbins number of overhang bins, (default=%i)\n", nbins);
+            fprintf(stderr, "\tDEPRECATED: -binsize size for offsets, (default=%i)\n", binsize);
+	    fprintf(stderr, "\t-nbins number of bins for offsets, (default=%i)\n", nbins);
 	    fprintf(stderr, "\t-lim nreads stop after nreads, (default=no limit)\n");
 	    fprintf(stderr, "\t-unstranded, force strand=0\n");
 	    fprintf(stderr, "\t-quiet, suppress verbose output\n\n"); 
             fprintf(stderr, "Output:\t-ssj: Splice Junction counts, tab-delimited  (default=stdout)\n");
             fprintf(stderr, "\tColumns are: chr, begin, end, strand, offset, count\n");
             fprintf(stderr, "\t-ssc: Splice boundary counts, tab-delimited  (default=none)\n");
-            fprintf(stderr, "\tColumns are: chr, position, strand, offset, count\n");
+            fprintf(stderr, "\tColumns are: chr, position, position, strand, offset, count\n");
             exit(1);
         }
 
