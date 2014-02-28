@@ -10,7 +10,7 @@ clean ::
 	rm -f -r ${SAMTOOLS_DIR} sjcount sjcount2 progressbar.o 
 
 ${SAMTOOLS_DIR}libbam.a:
-	wget http://sourceforge.net/projects/samtools/files/samtools/0.1.18/samtools-0.1.18.tar.bz2/download
+	wget http://sourceforge.net/projects/samtools/files/samtools/0.1.18/samtools-0.1.18.tar.bz2
 	tar -xf samtools-0.1.18.tar.bz2
 	rm -f samtools-0.1.18.tar.bz2
 	make -C samtools-0.1.18 all
