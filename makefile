@@ -1,20 +1,22 @@
-#SAMTOOLS_DIR=~/samtools/
 LATEXDIR=latex/
 GCC=g++
+SAMTOOLS_DIR=samtools-0.1.18/
 
-.PHONY: all
+.PHONY: all clean
 
 all: sjcount sjcount2
 
-${SAMTOOLS_DIR}libbam.a:
-	# You need to install samtools
-	# Get it by svn:
-	# svn co https://samtools.svn.sourceforge.net/svnroot/samtools/trunk/samtools
-	# enter the dir and type 'make all'
-	# don't forget to update the SAMDIR varibale in this makefile
-	exit 1	
+clean ::
+	rm -f -r ${SAMTOOLS_DIR} sjcount sjcount2 progressbar.o 
 
-progressbar.o:	progressbar.c progressbar.h
+${SAMTOOLS_DIR}libbam.a:
+	wget http://sourceforge.net/projects/samtools/files/samtools/0.1.18/samtools-0.1.18.tar.bz2/download
+	tar -xf samtools-0.1.18.tar.bz2
+	rm -f samtools-0.1.18.tar.bz2
+	make -C samtools-0.1.18 all
+	# If SAMTOOLS is already installed, you might want to update SAMTOOLS_DIR path without installing a fresh copy
+
+progressbar.o :	progressbar.c progressbar.h
 	$(GCC) -c progressbar.c 
 
 sjcount : sjcount.c progressbar.o ${SAMTOOLS_DIR}libbam.a
@@ -27,6 +29,4 @@ ${LATEXDIR}sjcount.pdf : ${LATEXDIR}sjcount.tex
 	pdflatex -output-directory=${LATEXDIR} ${LATEXDIR}sjcount.tex
 	pdflatex -output-directory=${LATEXDIR} ${LATEXDIR}sjcount.tex
 
-clean:
-	rm -f -r progressbar.o sjcount sjcount2
 
