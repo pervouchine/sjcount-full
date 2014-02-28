@@ -53,8 +53,8 @@ where
 
 The output consists of two files. First, a tab-delimited file containing splice junction counts is produced as follows
 \begin{verbatim}
-chr1    100     200     -1      10      25
-chr1    100     200     -1      11      12
+chr1    100     200     +       10      25
+chr1    100     200     +       11      12
 ...	...	...	...	...	...
 \end{verbatim}
 where the first column contains chromosome, the second and the third columns contain positions of terminal exonic 
@@ -149,16 +149,16 @@ reads, regardless of their overhang ($t=14$ for Q1, $t=12$ for Q2--Q4, and $t=8$
 Figure~\ref{fig::02}). Therefore, there is only one counter to increment, and the result will be the 
 ``collapsed'' counts. The output corresponding to Figure~\ref{fig::02} will then be
 \begin{verbatim}
-Ref     31      52      1       0       6
+Ref     31      52      +       0       6
 \end{verbatim}
 
 By contrast, to take into account the overhang information, one should set $binsize=1$ (and also specify $nbins$ 
 because the program doesn't know the range of possible overhang values). There will be a separate counter for each 
 offset $d$ and the output corresponding to Figure~\ref{fig::02} will be
 \begin{verbatim}
-Ref     31      52      1       8        2
-Ref     31      52      1       12       3
-Ref     31      52      1       14       1
+Ref     31      52      +       8        2
+Ref     31      52      +       12       3
+Ref     31      52      +       14       1
 \end{verbatim}
 Note that when aggregated by offset with the aggregation function $f(x_1,\dots,x_n) = x_1+\dots+x_n$, the result
 coincides with the collapsed number of counts; for $f(x_1,\dots,x_n) = \theta(x_1)+\dots+\theta(x_n)$, where 

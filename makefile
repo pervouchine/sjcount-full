@@ -4,7 +4,7 @@ GCC=g++
 
 .PHONY: all
 
-all: sjcount sjcount2 ${LATEXDIR}sjcount.pdf
+all: sjcount sjcount2
 
 $(SAMDIR)libbam.a:
 	# You need to install samtools
