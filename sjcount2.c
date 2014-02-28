@@ -144,9 +144,8 @@ int main(int argc,char* argv[]) {
 
     if(argc==1) {
 	fprintf(stderr, "sjcount %s counts split reads supporting splice junctions and continuous reads that cover exon boundaries\n", version);
-        fprintf(stderr, "Usage: %s -bam bam_file [-ssj junctions_output] [-ssc boundaries_output] [-log log_file] [-read1 0|1] [-read2 0|1] ",argv[0]);
-        fprintf(stderr, "[-nbins number_of_bins] [-lim number_of_lines] [-quiet]\n");
-        fprintf(stderr, "Type %s -h for more info\n\n",argv[0]);
+	fprintf(stderr, "This version differs in counting reads that cover exon boundaries\n");
+        fprintf(stderr, "Type %s -h for help\n",argv[0]);
         exit(1);
     }
 
@@ -167,6 +166,8 @@ int main(int argc,char* argv[]) {
 	if(strcmp(argv[i], "-unstranded") == 0) stranded = 0;
 
         if(strcmp(argv[i], "-h") ==0 ) {
+            fprintf(stderr, "Usage: %s -bam bam_file [-ssj junctions_output] [-ssc boundaries_output] [-log log_file] [-read1 0|1] [-read2 0|1] ",argv[0]);
+            fprintf(stderr, "[-nbins number_of_bins] [-lim number_of_lines] [-quiet]\n");
 	    fprintf(stderr, "sjcount %s\n", version);
             fprintf(stderr, "Input:  a sorted BAM file with a header\n");
             fprintf(stderr, "Options:\n");

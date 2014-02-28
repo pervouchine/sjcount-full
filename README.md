@@ -30,17 +30,12 @@ INSTALLATION
 To install, type 'make all'
 
 Prerequisites:
-	You need to install samtools
-
-	Get it by svn:
-	svn co https://samtools.svn.sourceforge.net/svnroot/samtools/trunk/samtools
-	enter the directory and type 'make all'
-
-	Samtools package Version: 0.1.18-dev (r982:313) is compartible (and likely so are oder versions)
+	You need samtools, but it will be installed automatically by the makefile
+	Samtools package Version: 0.1.18
 
 NOTE that
 
-1.	You need to to update the SAMDIR varibale in the makefile
+1.	If uyou have samtools already installed, you can simply update the SAMTOOLS_DIR varibale in the makefile
 
 2.	Some users get error messages even when compiling sjcount with a correct SAMDIR path, something like
 
@@ -49,35 +44,33 @@ NOTE that
 	/centos6/samtools-9.3.2013/libbam.a(bgzf.o): In function `bgzf_mt`:
 	/centos6/samtools-9.3.2013/bgzf.c:445: undefined reference to `pthread_create`
 
-This error has to do with big zip libraries, not with samtools
+This error has to do with big zip libraries, not with samtools. 
 
 ============================================================================
 
 USAGE
 
-./sjcount -bam bam_file [-ssj junctions_output] [-ssc boundaries_output] [-log log_file] [-maxlen max_intron_length] [-minlen min_intron_length] [-margin length] [-read1 0|1] [-read2 0|1] [-nbins number_of_bins] [-binsize bin_size] [-lim number_of_lines] [-quiet]
+ ./sjcount -bam bam_file [-ssj junctions_output] [-ssc boundaries_output] [-log log_file] [-maxlen max_intron_length] [-minlen min_intron_length] [-read1 0|1] [-read2 0|1] [-nbins number_of_bins] [-binsize bin_size] [-lim number_of_lines] [-quiet]
 
 Input:   a (sorted) BAM file
 
 Options:
 
-	-maxlen upper limit on intron length, 0 = no limit (default=0)
-	-minlen lower limit on intron length, 0 = no limit (default=0)
-	-margin length, minimum number of flanking nucleotides in order to support SJ or EB, (default=0)
+	DEPRECATED: -maxlen upper limit on intron length, 0 = no limit (default=0)
+	DEPRECATED: -minlen lower limit on intron length, 0 = no limit (default=0)
+	DEPRECATED: -margin length, minimum number of flanking nucleotides to support SJ or EB, (default=0)
 	-read1 0/1, reverse complement read1 no/yes (default=1)
 	-read2 0/1, reverse complement read2 no/yes (default=0)
-	-binsize size of the overhang bin, (default=+INFTY)
-	-nbins number of overhang bins, (default=1)
+	DEPRECATED: -binsize size for offsets, (default=1)
+	-nbins number of bins for offsets, (default=1)
 	-lim nreads stop after nreads, (default=no limit)
 	-unstranded, force strand=0
 	-quiet, suppress verbose output
 
-Output:
-
-	-ssj: Splice Junction counts, tab-delimited  (default=stdout)
+Output:	-ssj: Splice Junction counts, tab-delimited  (default=stdout)
 	Columns are: chr, begin, end, strand, offset, count
 	-ssc: Splice boundary counts, tab-delimited  (default=none)
-	Columns are: chr, pos, pos, strand, offset, count
+	Columns are: chr, position, position, strand, offset, count
 
 ============================================================================
 
