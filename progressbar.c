@@ -27,7 +27,6 @@ void progressbar(unsigned long current, unsigned long last, char *inscription, i
     m = (int)(w.ws_col*0.8);
 
     if(last==0) return;
-
     if(!verbose) return;
 
     if((m*(current-1))/last < (m*current)/last) {
