@@ -28,9 +28,11 @@
 #define ARRAY_MARGIN 2
 #define INFTY 65535
 
-const char version[100] = "v.1.0-full";
+
+const char version[100] = "v.1.0";
 
 int nbins   = 1;
+int binsize = 1;
 
 const int STRAND[2] = {1, -1};
 
@@ -64,23 +66,25 @@ class junction {
 };
 
 void update_site(site **ptr, int end, int strand, int offset, int count) {
-    if(offset >= nbins) offset = nbins -1;
+    int bin = (int)offset/binsize;
+    if(bin >= nbins) bin = nbins -1;
     while(*ptr != NULL && (*ptr)->pos < end) {
         ptr = &((*ptr)->next);
     }
     if(*ptr != NULL && (*ptr)->pos == end) {
-	(*ptr)->count[strand][offset] += count;
+	(*ptr)->count[strand][bin] += count;
     }
     else {
         site *next = (*ptr);
         (*ptr) = new site(end);
         (*ptr)->next = next;
-	(*ptr)->count[strand][offset] += count;
+	(*ptr)->count[strand][bin] += count;
     }
 }
 
 void update_jnxn(junction **ptr, int beg, int end, int strand, int offset, int count) {
-    if(offset >= nbins) offset = nbins -1;
+    int bin = (int)offset/binsize;
+    if(bin >= nbins) bin = nbins -1;
     while(*ptr != NULL && (*ptr)->pos < beg) {
     	ptr = &((*ptr)->next);
     }
@@ -91,7 +95,7 @@ void update_jnxn(junction **ptr, int beg, int end, int strand, int offset, int c
         junction *next = (*ptr);
 	(*ptr) = new junction(beg, end);
 	(*ptr)->next = next;
-	(*ptr)->partner->count[strand][offset] += count;
+	(*ptr)->partner->count[strand][bin] += count;
     }
 }
 
@@ -126,8 +130,12 @@ int main(int argc,char* argv[]) {
     int beg, end, pos, offset, increm; 
     int ref_id, ref_id_prev;
     int read_type, mapped_strand;
+    int flag;
 
+    int max_intron_length = 0;
+    int min_intron_length = 0;
     int rev_compl[2] = {1,0};
+    int margin = 0;
     int limit_counts = 0;
     int verbose = 1;
     int stranded = 1;
@@ -137,15 +145,12 @@ int main(int argc,char* argv[]) {
     junction **root_junction, ***curr_junction;
     site **root_site, ***curr_site;
 
-    site *qtr;
-    junction* ptr;
 
     timestamp = time(NULL);
 
     if(argc==1) {
 	fprintf(stderr, "sjcount %s counts split reads supporting splice junctions and continuous reads that cover exon boundaries\n", version);
-	fprintf(stderr, "This version differs in counting reads that cover exon boundaries\n");
-        fprintf(stderr, "Type %s -h for help\n",argv[0]);
+        fprintf(stderr, "Type %s -h for help info\n",argv[0]);
         exit(1);
     }
 
@@ -159,28 +164,37 @@ int main(int argc,char* argv[]) {
         if(strcmp(argv[i], "-read2") == 0) sscanf(argv[++i], "%i", &rev_compl[1]);
 
 	if(strcmp(argv[i], "-lim") == 0)    sscanf(argv[++i], "%i", &limit_counts);
+/*	if(strcmp(argv[i], "-minlen") == 0) sscanf(argv[++i], "%i", &min_intron_length);
+	if(strcmp(argv[i], "-maxlen") == 0) sscanf(argv[++i], "%i", &max_intron_length);
+	if(strcmp(argv[i], "-margin") == 0) sscanf(argv[++i], "%i", &margin); */
 
 	if(strcmp(argv[i], "-nbins")   == 0) sscanf(argv[++i], "%i", &nbins);
+        if(strcmp(argv[i], "-binsize") == 0) sscanf(argv[++i], "%i", &binsize);
 
 	if(strcmp(argv[i], "-quiet") == 0) verbose = 0;
 	if(strcmp(argv[i], "-unstranded") == 0) stranded = 0;
 
         if(strcmp(argv[i], "-h") ==0 ) {
-            fprintf(stderr, "Usage: %s -bam bam_file [-ssj junctions_output] [-ssc boundaries_output] [-log log_file] [-read1 0|1] [-read2 0|1] ",argv[0]);
-            fprintf(stderr, "[-nbins number_of_bins] [-lim number_of_lines] [-quiet]\n");
-	    fprintf(stderr, "sjcount %s\n", version);
+	    fprintf(stderr, "--- sjcount %s ---\n", version);
+            fprintf(stderr, "Usage: %s -bam bam_file [-ssj junctions_output] [-ssc boundaries_output] [-log log_file] ",argv[0]);
+            fprintf(stderr, "[-maxlen max_intron_length] [-minlen min_intron_length] [-read1 0|1] [-read2 0|1] ");
+            fprintf(stderr, "[-nbins number_of_bins] [-binsize bin_size] [-lim number_of_lines] [-quiet]\n");
             fprintf(stderr, "Input:  a sorted BAM file with a header\n");
             fprintf(stderr, "Options:\n");
+            fprintf(stderr, "\tDEPRECATED: -maxlen upper limit on intron length, 0 = no limit (default=%i)\n",max_intron_length);
+            fprintf(stderr, "\tDEPRECATED: -minlen lower limit on intron length, 0 = no limit (default=%i)\n",min_intron_length);
+            fprintf(stderr, "\tDEPRECATED: -margin length, minimum number of flanking nucleotides to support SJ or EB, (default=%i)\n",margin);
             fprintf(stderr, "\t-read1 0/1, reverse complement read1 no/yes (default=%i)\n",rev_compl[0]);
             fprintf(stderr, "\t-read2 0/1, reverse complement read2 no/yes (default=%i)\n",rev_compl[1]);
-	    fprintf(stderr, "\t-nbins number of overhang bins, (default=%i)\n", nbins);
+            fprintf(stderr, "\tDEPRECATED: -binsize size for offsets, (default=%i)\n", binsize);
+	    fprintf(stderr, "\t-nbins number of bins for offsets, (default=%i)\n", nbins);
 	    fprintf(stderr, "\t-lim nreads stop after nreads, (default=no limit)\n");
 	    fprintf(stderr, "\t-unstranded, force strand=0\n");
 	    fprintf(stderr, "\t-quiet, suppress verbose output\n\n"); 
             fprintf(stderr, "Output:\t-ssj: Splice Junction counts, tab-delimited  (default=stdout)\n");
             fprintf(stderr, "\tColumns are: chr, begin, end, strand, offset, count\n");
             fprintf(stderr, "\t-ssc: Splice boundary counts, tab-delimited  (default=none)\n");
-            fprintf(stderr, "\tColumns are: chr, position, strand, offset, count\n");
+            fprintf(stderr, "\tColumns are: chr, position, position, strand, offset, count\n");
             exit(1);
         }
 
@@ -226,6 +240,17 @@ int main(int argc,char* argv[]) {
         }
     }
 
+    if(max_intron_length>0) {
+	fprintf(log_file,"[Warning: set max intron length=%i]\n", max_intron_length);
+    }
+
+    if(min_intron_length>0) {
+        fprintf(log_file,"[Warning: set min intron length=%i]\n", min_intron_length);
+    }
+
+    if(margin>0) {
+	fprintf(log_file,"[Warning: read margin set to %i]\n", margin);
+    }
 
     if(stranded==0) {
 	fprintf(log_file,"[Warning: strand is ignored (forced to zero)]\n");
@@ -233,6 +258,10 @@ int main(int argc,char* argv[]) {
 
     for(s = 0; s < 2; s++) {
 	if(rev_compl[s]) fprintf(log_file,"[Warning: will take reverse complement of read %i]\n", s+1);
+    }
+
+    if(binsize<INFTY) {
+        fprintf(log_file,"[Warning: reads will be binned by exonic overhang, binsize=%int, number of bins=%i]\n", binsize, nbins);
     }
 
 
@@ -297,11 +326,18 @@ int main(int argc,char* argv[]) {
 	    	case BAM_CMATCH: 	pos += increm;  	// match to the reference
 					offset += increm;	//
 				 	break;
-		case BAM_CINS:		offset += increm;	// insertion to the reference, pos stays unchanged
+		case BAM_CINS:		pos += 0;		// insertion to the reference, pos stays unchanged
+					offset += increm;	//			       offset increases
 					break;
 		case BAM_CDEL:		pos += increm;		// deletion from the reference (technically the same as 'N') pointer moves
+					offset += 0;		// offset doesn't
                                         break;
                 case BAM_CREF_SKIP: 
+					if(i==0 || i==c->n_cigar) break;
+					if(cigar[i-1] & 0x0F !=BAM_CMATCH || cigar[i+1] & 0x0F != BAM_CMATCH) break;
+					if((cigar[i-1] >> 4) < margin || (cigar[i+1] >> 4) < margin) break;
+					if(increm < min_intron_length && min_intron_length > 0) continue;
+					if(increm > max_intron_length && max_intron_length > 0) break;
 					update_jnxn(curr_junction[ref_id], pos - 1, 	pos + increm, 	mapped_strand, offset, 1);
 					update_site(curr_site[ref_id], 	   pos - 1, 			mapped_strand, offset, 0);
 					update_site(curr_site[ref_id],     pos + increm,		mapped_strand, offset, 0);
@@ -319,7 +355,7 @@ int main(int argc,char* argv[]) {
     if(verbose) progressbar(1, 1, header->target_name[ref_id_prev], verbose); 
 
     for(i = 0; i < header->n_targets; i++) {
-	ptr = root_junction[i];
+	junction* ptr = root_junction[i];
 	while(ptr != NULL) {
 	    site* qtr = ptr->partner;
 	    while(qtr != NULL) {
@@ -392,35 +428,36 @@ int main(int argc,char* argv[]) {
 
         for(;k<beg;k++) progressbar(k, header->target_len[ref_id], header->target_name[ref_id], verbose);
 
+	flag = 1;
     	pos = beg;
-        offset = 0;
         for(i = 0; i < c->n_cigar; i++) {
             increm = cigar[i] >> 4;
             switch(cigar[i] & 0x0F) {
-                case BAM_CMATCH:	qtr = (*curr_site[ref_id]);
-					while(qtr != NULL && qtr->pos < pos + increm) {
-					    if(qtr->pos > pos && qtr->pos < pos + increm -1 ) {
-						int bin = qtr->pos - pos + offset;
-						qtr->count[mapped_strand][bin]++;
-					    }
-					    qtr = qtr->next;
-					}
-				        pos += increm;  	// match to the reference
-					offset += increm;	//
+                case BAM_CMATCH:        pos += increm;  // match to the reference
                                         break;
-                case BAM_CINS:          offset += increm;      	// insertion to the reference, pointer stays unchanged
-                                        break;
-                case BAM_CDEL:          			// deletion from the reference (technically the same as 'N') pointer moves
-                case BAM_CREF_SKIP:	pos += increm;
-					break;
-                case BAM_CSOFT_CLIP:	offset += increm;
-					break;
+                case BAM_CINS:          //pos += 0;       // insertion to the reference, pointer stays unchanged
+                                        //break;
+                case BAM_CDEL:          //pos += increm;  // deletion from the reference (technically the same as 'N') pointer moves
+                                        //break;
+                case BAM_CREF_SKIP:
+                case BAM_CSOFT_CLIP:
                 case BAM_CHARD_CLIP:
                 case BAM_CPAD:           
-                default:
+                default:                flag=0;
 					break;
             }
         }
+	end = pos;
+
+	if(flag) {
+	    site *qtr = (*curr_site[ref_id]);
+	    while(qtr != NULL && qtr->pos < end) {
+		int bin = (int)(qtr->pos - beg)/binsize;
+		if(bin >= nbins) bin = nbins -1;
+		if(qtr->pos > beg + margin && qtr->pos < end - margin - 1 ) qtr->count[mapped_strand][bin]++;
+		qtr = qtr->next;
+	    }
+	}
 
         n_reads++;
         if(n_reads>limit_counts && limit_counts>0) break;
@@ -428,7 +465,7 @@ int main(int argc,char* argv[]) {
     if(verbose) progressbar(1, 1, header->target_name[ref_id_prev], verbose);
 
     for(i = 0; i < header->n_targets; i++) {
-        qtr = root_site[i];
+        site *qtr = root_site[i];
         while(qtr != NULL) {
 	    for(j=0; j<2; j++) { 
             	for(k = 0; k < nbins; k++) {

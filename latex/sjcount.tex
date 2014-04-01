@@ -6,32 +6,43 @@
 \usepackage{amsmath}
 \usepackage{multirow}
 \usepackage{hyperref}
+\usepackage[affil-it]{authblk}
 
 \DeclareMathOperator{\SJ}{SJ}
 
-\renewcommand{\baselinestretch}{1.1}
+\renewcommand{\baselinestretch}{1.2}
 
 \begin{document}
-\title{Fast quantification of splice junctions by {\em sjcount}}
-\author{Dmitri D. Pervouchine}
+
+\title{Fast quantification of splice junctions from RNA-seq data by {\em sjcount} v2.0}
+
+\author{Dmitri D. Pervouchine\thanks{email: dp@crg.eu}}\affil{Centre for Genomic Regulation (CRG), Barcelona, Spain}
+
 \date{\today}
 \maketitle
 
 \section{Synopsis}
 
 The purpose of {\em sjcount} is to provide a fast method for quantification of splice junctions from BAM files. It is the annotation-agnostic version of 
-\href{https://github.com/pervouchine/bam2ssj}{bam2ssj}.
+\href{https://github.com/pervouchine/bam2ssj}{bam2ssj}. This document describes the version {\bf v2.0} of {\em sjcount}. The older version of {\em sjcount}
+(v1.0) is also included in the package inder the name {\em sjcount-deprecated}.
 
+\section{Changes w.r.t to the previous version (v1.0)}
+Below are the major changes that make v2.0 different from v1.0.
+\begin{enumerate}
+\item The computation of reads overlapping exon boundaries now includes all, not only continuous reads
+\item -maxlen upper limit on intron length: deprecated
+\item -minlen lower limit on intron length: deprecated
+\item -margin, minimum number of flanking nucleotides to support SJ or EB: deprecated
+\item -binsize, the size of bins for offsets: deprecated
+\item -maxnh the max value of the NH tag (set to 1 for uniquely mapped reads): added 
+\end{enumerate}
 
 \section{Installation and usage}
-
 See README.md file for installation instructions. The program {\em sjcount} is used from the command line with the following keys
-
 \begin{verbatim}
 sjcount -bam bam_file [-ssj junctions_output] [-ssc boundary_output]
-       [-maxlen max_intron_length] [-minlen min_intron_length] 
-       [-margin length] [-read1 0|1] [-read2 0|1] [-unstranded] 
-       [-nbins number_of_bins] [-binsize bin_size] 
+       [-read1 0|1] [-read2 0|1] [-unstranded] [-nbins number_of_bins]
        [-lim number_of_lines] [-quiet]
 \end{verbatim}
 where
@@ -39,15 +50,12 @@ where
 \item {\bf bam\_file} is a sorted input BAM file with a header
 \item {\bf junctions\_output} is the output file with junction counts
 \item {\bf boundary\_output} is the output file with boundary counts
-\item {\bf maxlen} upper limit on intron length, 0 = no limit (default=0)
-\item {\bf minlen} lower limit on intron length, 0 = no limit (default=0)
-\item {\bf margin} length, see below, (default=0)
 \item {\bf read1} 0/1, reverse complement read1 no/yes (default=no)
 \item {\bf read2} 0/1, reverse complement read2 no/yes (default=no)
 \item {\bf unstranded}, force strand=0
-\item {\bf binsize} size of the overhang bin, (default=$\infty$)
-\item {\bf nbins} number of overhang bins, (default=1)
-\item {\bf lim} nreads stop after nreads, (default=no limit)
+\item {\bf nbins} number of offset bins, (default=1)
+\item {\bf maxnh} the max value of the NH tag, (default=none)
+\item {\bf lim} stop after reading these many lines, (default=no limit)
 \item {\bf quiet} -- suppress verbose output {\bf NOTE: use -quiet if you redirect stderr to a file!}
 \end{itemize}
 
@@ -57,21 +65,24 @@ chr1    100     200     +       10      25
 chr1    100     200     +       11      12
 ...	...	...	...	...	...
 \end{verbatim}
-where the first column contains chromosome, the second and the third columns contain positions of terminal exonic 
-nucleotides defining the splice junction, the fourth column contains strand (1 or -1 for stranded or 0 for unstranded 
-data), the fifth column is the offset (see definition below), and the last column is the respective count, i.e., the 
-number of splices with these properties.
+where the first column contains chromosome, the second and the third columns contain the positions of {\em terminal 
+exonic nucleotides} corresponding to a splice junction, the fourth column contains strand ('+' or '-' for stranded 
+or '.' for unstranded data), the fifth column is the offset (defined below), and the last column is the respective 
+count, i.e., the number of split-mapped reads with the given combination of chromosome, begin, end, strand, and 
+offset.
 
-The secons output is also a tab-delimited file which contains read counts of alignments which {\em overlap} splice sites, 
-where the latter are defined in the previous step. Only continuous alignments (not split reads) are considered. This second 
-file is optional and is needed to compute the completness of splicing index~\cite{pmid23172860, pmid22955974}.
+The secons output file is also a tab-delimited file which contains read counts of read alignments which {\em overlap} 
+exon boundries (exon boundries are defined by splice junctions in the previous file). In this version all alignments 
+that overlap an exon boundary by at least one nucleotide are counted (in older versions only continuous alignments were
+considered. This second file is optional and is needed to compute the completness of splicing index~\cite{pmid23172860, pmid22955974}.
 
 \section{Definitions}
-By definition, we say that we observe a {\em splice junction} each time we see an 'N' symbol in the CIGAR attribute of 
-the alignment. That is, splice junctions are decided entirely by the mapper which produced the alignment.
-Each splice junction is characterized by a combination of four attributes: chromosome, start, end, and 
-strand. We keep the convention that start and end of a splice junction always refer to the terminal {\it exonic}
-nucleotides. For instance, the alignment shown in Figure~\ref{fig::01} below corresponds to two splice junctions,  
+By definition, we say that we observe a {\em splice junction} each time we see an 'N' symbol in the CIGAR attribute 
+of the alignment. If a CIGAR attribute contains several N's, it will be counted several times. Splice junctions are 
+decided entirely by the mapper which produced the alignment. Each 
+splice junction is characterized by a combination of four attributes: chromosome, start, end, and strand. We keep 
+the convention that start and end of a splice junction always refer to the terminal {\it exonic} nucleotides. For 
+instance, the alignment shown in Figure~\ref{fig::01} below corresponds to two splice junctions,  
 denoted by $\SJ_1$ and $\SJ_2$. 
 %
 \begin{figure}[h]
@@ -96,30 +107,15 @@ The coordinates of these splice junctions are $\SJ_1=\rm Ref\_31\_52$ and $\SJ2=
 by $l(\SJ)$ the length of the spliced region, i.e. $l(\SJ_1)=52-31-1=20$ and $l(\SJ_2)=78-64-1=13$. Note that
 $l(\SJ)$ is equal to the corresponding 'N' number in the CIGAR attribute.
 
-Each splice junctions is associated with two {\em overhangs}, $m_u$ and $m_d$, the number of matching 
-nucleotides immediately upstream and downstream of the junction, respectively. The numbers $m_u$ and $m_d$ 
-are the corresponding lengths in the preceding and in the following 'M' attribute of CIGAR. For example, in
-Figure~\ref{fig::01} we have $m_u(\SJ_1)=6$, $m_d(\SJ_1)=5$, $m_u(\SJ_2)=7$, and $m_d(\SJ_2)=3$.
-
-
-The keys {\bf maxlen}, {\bf minlen}, and {\bf margin} are used as follows. For each splice junction we 
-require that
-\begin{enumerate}
-\item $l(\SJ)\ge \rm\bf minlen$ and $l(\SJ)\le \rm\bf maxlen$
-\item $m_u\ge \rm\bf margin$ and $m_d\ge \rm\bf margin$
-\end{enumerate}
-These threshold are needed to filter out non-reliable alignments with short overhangs, standartize the 
-overhang requirement for PSI and coSI computations~\cite{pmid23172860, pmid22955974}, and get rid of 
-excessively long, artifactual introns.
-
-Additionally, artifacts may arise by combining counts that come from different starting positions of the 
-alignment. We define {\em offset} $t(\SJ)$ to be the distance ({\em in the query sequence!}) from the first 
+Artifacts may arise from combining counts that come from different starting positions of the alignment. We 
+define {\em offset} $t(\SJ)$ to be the distance ({\em in the query sequence!}) from the first 
 alignment position to the corresponding 'N'. For instance, $t(\SJ_1)=17$ and $t(\SJ_2) = 29$. Since offset
 is defined as a refernce in the query sequence, its values are bounded by the read length.
 
-Some offsets may give rise to artifactually large
-read counts~\cite{pmid22537040}. In Figure~\ref{fig::02} we show six split reads supporting the same 
-splice junction with offsets 14 (Q1), 12 (Q2--Q4), and 8 (Q5--Q6).
+Some offsets may give rise to artifactually large read counts~\cite{pmid22537040}. In Figure~\ref{fig::02} 
+we show six split reads supporting the same splice junction with offsets~14 (Q1), 12 (Q2--Q4), and~8 (Q5--Q6).
+Although it might seem controversial, offsets appear decreasing when sequentially processing lines a sorted 
+BAM file.
 %
 \begin{figure}[h]
 \footnotesize
@@ -137,24 +133,24 @@ Q4              ACGGCATAGGAG....................ATCTAC
 Q5                  CATAGGAG....................ATCTACAAAA
 Q6                  CATAGGAG....................ATCTACAAAA
 \end{verbatim}
-\caption{Split reads support the same splice junction with different overhangs\label{fig::02}}
+\caption{Split-mapped reads support the same splice junction with different offsets\label{fig::02}}
 \end{figure}
 
 The quantification of abundance is done as follows. For each splice junction (pair of coordinates) 
 we initialize and keep $nbins$ separate counters. For each instance of a splice junction we increment 
-the counter corresponding to the overhang bin defined by $d=floor(v_u/binsize)$.
+the counter corresponding to its offset. If the offset is larger than or equal to $nbins$ then it is 
+set to be equal to $nbins-1$.
 
-For example, in the default settings we have $binsize=+\infty$. This means that $d=0$ for all supporting 
-reads, regardless of their overhang ($t=14$ for Q1, $t=12$ for Q2--Q4, and $t=8$ for Q5--Q6 in 
-Figure~\ref{fig::02}). Therefore, there is only one counter to increment, and the result will be the 
-``collapsed'' counts. The output corresponding to Figure~\ref{fig::02} will then be
+For example, in the default settings we have $nbins=1$. This means that the bin number will be $1-1=0$ 
+for all supporting reads, regardless of their offset ($t=14$ for Q1, $t=12$ for Q2--Q4, and $t=8$ for 
+Q5--Q6 in Figure~\ref{fig::02}). Therefore, there is only one counter to increment, and the result will 
+be the ``collapsed'' counts. The output corresponding to Figure~\ref{fig::02} will then be
 \begin{verbatim}
 Ref     31      52      +       0       6
 \end{verbatim}
 
-By contrast, to take into account the overhang information, one should set $binsize=1$ (and also specify $nbins$ 
-because the program doesn't know the range of possible overhang values). There will be a separate counter for each 
-offset $d$ and the output corresponding to Figure~\ref{fig::02} will be
+By contrast, if we set $nbins=1$, there will be a separate counter for each offset and the output 
+corresponding to Figure~\ref{fig::02} will be
 \begin{verbatim}
 Ref     31      52      +       8        2
 Ref     31      52      +       12       3
