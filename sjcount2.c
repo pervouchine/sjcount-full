@@ -28,7 +28,7 @@
 #define ARRAY_MARGIN 2
 #define INFTY 65535
 
-const char version[100] = "v.2.14-full";
+const char version[100] = "v.1.0-full";
 
 int nbins   = 1;
 

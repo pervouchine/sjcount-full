@@ -29,7 +29,7 @@
 #define INFTY 65535
 
 
-const char version[100] = "v.2.14";
+const char version[100] = "v.1.0";
 
 int nbins   = 1;
 int binsize = 1;

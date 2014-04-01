@@ -1,4 +1,4 @@
-Version 1.11	Sep 27, 2013
+Version 0.11	Sep 27, 2013
 		1. The output format has changed compared to previous versions. Previously the output format was chr, 
 		beg, end, count+, count-. Now the format is chr, beg, end, strand, offset, count. Also, the offset
 		has been added compared to previous versions and to bam2ssj. 
@@ -9,14 +9,14 @@ Version 1.11	Sep 27, 2013
 		samtools view ${TESTFILE} | perl sam2sj.pl ${PARAM} | awk '{count[$$0]++}END{for(j in count) print j,"\t",count[j]}' | sort -k1,1 -k2,2n -k3,3n > test.tab
 		The output is identical to that of sjcount
 
-Version 1.12	Oct 2, 2013
+Version 0.12	Oct 2, 2013
 		1. -unstranded option has been added (basically reduces the number of output lines by 2)
 
-Version 1.13	Oct 30,2013
+Version 0.13	Oct 30,2013
 		1. The definition of the offset changed to: offset = distance (in the query) from the beginning of the read to the SJ
 		2. The default for read1 is back to 1
 
-Version 1.14    Jan 28,2014
+Version 1.0     Jan 28,2014
 		1. maxintron, mininteron, margin - deprecated
 		2. binsize = 1; deprecated
 		3. sjcount: in bondary counts only 'M' in cigar are considered
