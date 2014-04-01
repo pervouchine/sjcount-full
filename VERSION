@@ -22,5 +22,15 @@ Version 1.0     Jan 28,2014
 		3. sjcount: in bondary counts only 'M' in cigar are considered
 		4. sjcount2 is a version which tolerates everything (not only Ms) in the cigar for ssc
 
+Version 2.0	Apr 1, 2014
+		1. The computation of reads overlapping exon boundaries now includes all, not only continuous reads
+		2. maxlen upper limit on intron length: deprecated
+		3. minlen lower limit on intron length: deprecated
+		4. margin, minimum number of flanking nucleotides to support SJ or EB: deprecated
+		5. binsize, the size of bins for offsets: deprecated
+		6. maxnh the max value of the NH tag (set to 1 for uniquely mapped reads): added
+		7. counting lim_reads now moven to the beginning of the loop 
+
+
 
 
