@@ -4,10 +4,10 @@ SAMTOOLS_DIR=samtools-0.1.18/
 
 .PHONY: all clean test
 
-all: sjcount-deprecated sjcount
+all: sjcount-deprecated sjcount sjcount3
 
 clean ::
-	rm -f -r sjcount-deprecated sjcount progressbar.o 
+	rm -f -r sjcount-deprecated sjcount progressbar.o sjcount3
 
 ${SAMTOOLS_DIR}libbam.a:
 	wget http://sourceforge.net/projects/samtools/files/samtools/0.1.18/samtools-0.1.18.tar.bz2
@@ -24,6 +24,10 @@ sjcount-deprecated : sjcount-deprecated.c progressbar.o ${SAMTOOLS_DIR}libbam.a
 
 sjcount : sjcount.c progressbar.o ${SAMTOOLS_DIR}libbam.a
 	$(GCC) -I ${SAMTOOLS_DIR} sjcount.c progressbar.o ${SAMTOOLS_DIR}libbam.a -lz -o sjcount
+
+sjcount3 : sjcount3.c progressbar.o ${SAMTOOLS_DIR}libbam.a
+	$(GCC) -I ${SAMTOOLS_DIR} sjcount3.c progressbar.o ${SAMTOOLS_DIR}libbam.a -lz -o sjcount3
+
 
 ${LATEXDIR}sjcount.pdf : ${LATEXDIR}sjcount.tex
 	pdflatex -output-directory=${LATEXDIR} ${LATEXDIR}sjcount.tex
