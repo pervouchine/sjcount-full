@@ -44,8 +44,7 @@ while(<STDIN>){
 		     }
 	    case 'D' {  $pos += $increment;  
 		     }
-	    case 'N' {  $bin = int($offset/$nbins);
-			$bin = $nbins - 1 if($bin>=$nbins);
+	    case 'N' {  $bin = ($offset>=$nbins) ? $nbins - 1 : $offset;
 			$count{join("\t", $ref, $pos - 1, $pos + $increment, $STRAND[$strand], $bin)}++; 
 			$pos += $increment; 
 		     }

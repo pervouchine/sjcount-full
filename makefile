@@ -43,18 +43,18 @@ test :: ${TESTDIR}control.ssj ${TESTDIR}control.ssc
 PARAMS=-lim 100000 -nbins 50 -read1 0 -read2 0
 
 ${TESTDIR}test.bam : 
-	wget http://gasv.googlecode.com/files/Example.bam -O ${TESTDIR}test.bam
+	wget genome.crg.es/~dmitri/export/test.bam -O ${TESTDIR}test.bam
 
 ${TESTDIR}test.ssj ${TESTDIR}test.ssc : ${TESTDIR}test.bam sjcount
 	sjcount -bam ${TESTDIR}test.bam -ssj ${TESTDIR}test.ssj -ssc ${TESTDIR}test.ssc ${PARAMS}
 
 ${TESTDIR}control.ssj : ${TESTDIR}test.bam ${TESTDIR}test.ssj ${TESTDIR}sam2sj.pl
-	${SAMTOOLS_DIR}samtools view ${TESTDIR}test.bam  | perl ${TESTDIR}sam2sj.pl ${PARAMS} |sort -k1,1 -k2,3n > ${TESTDIR}control.ssj
-	cmp ${TESTDIR}test.ssj ${TESTDIR}control.ssj
+	${SAMTOOLS_DIR}samtools view ${TESTDIR}test.bam  | perl ${TESTDIR}sam2sj.pl ${PARAMS} | sort > ${TESTDIR}control.ssj
+	sort ${TESTDIR}test.ssj | cmp ${TESTDIR}control.ssj
 
 ${TESTDIR}control.ssc : ${TESTDIR}test.bam ${TESTDIR}test.ssc ${TESTDIR}control.ssj ${TESTDIR}sam2sb.pl
-	${SAMTOOLS_DIR}samtools view ${TESTDIR}test.bam  | perl ${TESTDIR}sam2sb.pl -ssj ${TESTDIR}control.ssj ${PARAMS} |sort -k1,1 -k2,3n > ${TESTDIR}control.ssc
-	cmp ${TESTDIR}test.ssc ${TESTDIR}control.ssc
+	${SAMTOOLS_DIR}samtools view ${TESTDIR}test.bam  | perl ${TESTDIR}sam2sb.pl -ssj ${TESTDIR}control.ssj ${PARAMS} | sort > ${TESTDIR}control.ssc
+	sort ${TESTDIR}test.ssc | cmp ${TESTDIR}control.ssc
 
 clean ::
 	rm -f ${TESTDIR}test.bam ${TESTDIR}test.ssj ${TESTDIR}test.ssc ${TESTDIR}control.ssj ${TESTDIR}control.ssc

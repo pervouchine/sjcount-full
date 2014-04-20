@@ -45,8 +45,7 @@ while(<STDIN>){
         switch($operation) {
 	    case 'M' {	for($i=1;$i<$increment-1;$i++) {
 			    $x = $pos + $i;
-			    $bin = int(($offset+$i)/$nbins);
-			    $bin = $nbins - 1 if($bin>=$nbins);
+			    $bin = ($offset+$i >= $nbins ? $nbins - 1 : $offset + $i);
 			    $count{join("\t", $ref, $x, $x, $STRAND[$strand], $bin)}++ if($site{$chr}{$x}); 
 			}
 			$pos += $increment;
