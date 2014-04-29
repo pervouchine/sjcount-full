@@ -43,7 +43,7 @@ test :: ${TESTDIR}control.ssj ${TESTDIR}control.ssc
 PARAMS=-lim 100000 -nbins 50 -read1 0 -read2 0
 
 ${TESTDIR}test.bam : 
-	wget genome.crg.es/~dmitri/export/test.bam -O ${TESTDIR}test.bam
+	wget genome.crg.es/~dmitri/export/sjcount/test.bam -O ${TESTDIR}test.bam
 
 ${TESTDIR}test.ssj ${TESTDIR}test.ssc : ${TESTDIR}test.bam sjcount
 	sjcount -bam ${TESTDIR}test.bam -ssj ${TESTDIR}test.ssj -ssc ${TESTDIR}test.ssc ${PARAMS}
