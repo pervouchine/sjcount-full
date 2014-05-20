@@ -38,9 +38,11 @@ ${LATEXDIR}sjcount.pdf : ${LATEXDIR}sjcount.tex
 TESTDIR=test/
 
 test :: ${TESTDIR}control.ssj ${TESTDIR}control.ssc
+	sort ${TESTDIR}test.ssj | cmp ${TESTDIR}control.ssj
+	sort ${TESTDIR}test.ssc | cmp ${TESTDIR}control.ssc
 	#===> tests passed successfully <===#
 
-PARAMS=-lim 100000 -nbins 50 -read1 0 -read2 0
+PARAMS=-lim 1000000 -nbins 50 -read1 0 -read2 0
 
 ${TESTDIR}test.bam : 
 	wget genome.crg.es/~dmitri/export/sjcount/test.bam -O ${TESTDIR}test.bam
@@ -50,14 +52,28 @@ ${TESTDIR}test.ssj ${TESTDIR}test.ssc : ${TESTDIR}test.bam sjcount
 
 ${TESTDIR}control.ssj : ${TESTDIR}test.bam ${TESTDIR}test.ssj ${TESTDIR}sam2sj.pl
 	${SAMTOOLS_DIR}samtools view ${TESTDIR}test.bam  | perl ${TESTDIR}sam2sj.pl ${PARAMS} | sort > ${TESTDIR}control.ssj
-	sort ${TESTDIR}test.ssj | cmp ${TESTDIR}control.ssj
 
 ${TESTDIR}control.ssc : ${TESTDIR}test.bam ${TESTDIR}test.ssc ${TESTDIR}control.ssj ${TESTDIR}sam2sb.pl
 	${SAMTOOLS_DIR}samtools view ${TESTDIR}test.bam  | perl ${TESTDIR}sam2sb.pl -ssj ${TESTDIR}control.ssj ${PARAMS} | sort > ${TESTDIR}control.ssc
-	sort ${TESTDIR}test.ssc | cmp ${TESTDIR}control.ssc
 
 clean ::
 	rm -f ${TESTDIR}test.bam ${TESTDIR}test.ssj ${TESTDIR}test.ssc ${TESTDIR}control.ssj ${TESTDIR}control.ssc
 
+######################################################################################################################
+
+${TESTDIR}test.ssj3 : ${TESTDIR}test.bam sjcount3
+	sjcount3 -bam ${TESTDIR}test.bam ${PARAMS} | sort > ${TESTDIR}test.ssj3
+
+${TESTDIR}control.ssj3 : ${TESTDIR}test.bam  ${TESTDIR}sam2sj-all.pl
+	${SAMTOOLS_DIR}samtools view ${TESTDIR}test.bam  | perl ${TESTDIR}sam2sj-all.pl ${PARAMS} | sort > ${TESTDIR}control.ssj3
+
+
+test3 :: ${TESTDIR}test.ssj3 ${TESTDIR}control.ssj3
+	cmp ${TESTDIR}test.ssj3 ${TESTDIR}control.ssj3
+	#===> tests passed successfully <===#
+
+
+clean ::
+	rm -f ${TESTDIR}test.ssj3 ${TESTDIR}control.ssj3
 
 

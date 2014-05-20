@@ -53,7 +53,7 @@ class node {
     }
 };
 
-void update_node(node **ptr, int beg, int end, int strand, int offset) {
+node** update_node(node **ptr, int beg, int end, int strand, int offset) {
     if(offset >= nbins) offset = nbins -1;
     while(*ptr != NULL && ((*ptr)->beg < beg || (*ptr)->beg == beg && (*ptr)->end < end)) {
     	ptr = &((*ptr)->down);
@@ -67,6 +67,7 @@ void update_node(node **ptr, int beg, int end, int strand, int offset) {
 	(*ptr)->down = next;
 	(*ptr)->count[strand][offset]++;
     }
+    return(&((*ptr)->right));
 }
 
 char strand_i2c(int i) {
@@ -273,6 +274,7 @@ int main(int argc,char* argv[]) {
 	for(;k<beg;k++) progressbar(k, header->target_len[ref_id], header->target_name[ref_id], verbose);
 
 	offset = 0;
+	node_ptr = curr[ref_id];
         for(i = 0; i < c->n_cigar; i++) {
 	    increm = cigar[i] >> 4;
 	    switch(cigar[i] & 0x0F) {
@@ -283,7 +285,7 @@ int main(int argc,char* argv[]) {
 					break;
 		case BAM_CDEL:		pos += increm;		// deletion from the reference (technically the same as 'N') pointer moves
                                         break;
-                case BAM_CREF_SKIP:	update_node(curr[ref_id], pos - 1, pos + increm, mapped_strand, offset); 
+                case BAM_CREF_SKIP:	node_ptr = update_node(node_ptr, pos - 1, pos + increm, mapped_strand, offset);
 					pos += increm;
 				 	break;
 		case BAM_CSOFT_CLIP:	offset += increm;
@@ -296,10 +298,15 @@ int main(int argc,char* argv[]) {
     if(verbose) progressbar(1, 1, header->target_name[ref_id_prev], verbose); 
 
     for(i = 0; i < header->n_targets; i++) {
-	for(p = root[i];p != NULL;p = p->down) {
-            for(j=0; j<2; j++) {
+	for(p = root[i];p != NULL; p = p->down) {
+	    for(s=0; s<2; s++) {
                 for(k = 0; k < nbins; k++) {
-	    	    if(p->count[j][k] > 0)  fprintf(ssj_file, "%s\t%i\t%i\t%c\t%i\t%i\n", header->target_name[i], p->beg, p->end, strand_i2c(STRAND[j]*stranded),k,p->count[j][k]);
+		    *buff=0;
+		    for(q = p, j = 0; q != NULL; q = q->right, j++) {
+			if(j>0) strcat(buff, (char*)("-"));
+			sprintf(buff+strlen(buff), "%i^%i",q->beg, q->end);
+			if(q->count[s][k]>0) fprintf(ssj_file, "%s\t%c\t%i\t%s\t%i\t%i\n", header->target_name[i], strand_i2c(STRAND[s]*stranded), j + 1, buff, k, q->count[s][k]);
+		    }
 		}
 	    }
 	}
