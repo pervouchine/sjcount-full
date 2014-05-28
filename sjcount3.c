@@ -27,22 +27,25 @@
 #define MAXFILEBUFFLENGTH 1000
 #define ARRAY_MARGIN 2
 #define INFTY 65535
+#define MAXSPLIT 256
 
-const char version[100] = "v2.0";
+const char version[100] = "v3.0";
 
 int nbins   = 1;
 
 const int STRAND[2] = {1, -1};
 
-class node {
+//*************************************************************************************************************************//
+
+class jnxn {
     public:
-    	node *down;
-    	node *right;
+    	jnxn *down;
+    	jnxn *right;
     	int beg;
 	int end;
     	int* count[2];
 
-    node(int b, int e) {
+    jnxn(int b, int e) {
 	beg = b;
 	end = e;
 	for(int j=0; j<2; j++) {
@@ -53,7 +56,7 @@ class node {
     }
 };
 
-node** update_node(node **ptr, int beg, int end, int strand, int offset) {
+jnxn** update_jnxn(jnxn **ptr, int beg, int end, int strand, int offset) {
     if(offset >= nbins) offset = nbins -1;
     while(*ptr != NULL && ((*ptr)->beg < beg || (*ptr)->beg == beg && (*ptr)->end < end)) {
     	ptr = &((*ptr)->down);
@@ -62,13 +65,49 @@ node** update_node(node **ptr, int beg, int end, int strand, int offset) {
 	(*ptr)->count[strand][offset]++;
     }
     else {
-        node *next = (*ptr);
-	(*ptr) = new node(beg, end);
+        jnxn *next = (*ptr);
+	(*ptr) = new jnxn(beg, end);
 	(*ptr)->down = next;
 	(*ptr)->count[strand][offset]++;
     }
     return(&((*ptr)->right));
 }
+
+//*************************************************************************************************************************//
+
+class site {
+    public:
+        site *next;
+        int pos;
+        int* count[2];
+
+    site(int p) {
+        pos = p;
+        for(int j=0; j<2; j++) {
+            count[j] = (int*) malloc(sizeof(int) * nbins);
+            for(int k=0; k<nbins; k++) count[j][k] = 0;
+        }
+        next = NULL;
+    }
+};
+
+void update_site(site **ptr, int pos, int strand, int offset, int v) {
+    if(offset >= nbins) offset = nbins -1;
+    while(*ptr != NULL && (*ptr)->pos < pos) {
+        ptr = &((*ptr)->next);
+    }
+    if(*ptr != NULL && (*ptr)->pos == pos) {
+        (*ptr)->count[strand][offset]++;
+    }
+    else {
+        site *next = (*ptr);
+        (*ptr) = new site(pos);
+        (*ptr)->next = next;
+        (*ptr)->count[strand][offset]++;
+    }
+}
+
+//*************************************************************************************************************************//
 
 char strand_i2c(int i) {
     if(i>0) return('+');
@@ -111,9 +150,13 @@ int main(int argc,char* argv[]) {
     int n_reads = 0;
     int max_nh = 0;
 
-    node **root, ***curr;
-    node **node_ptr;
-    node *p, *q;
+    jnxn **root_jnxn, ***curr_jnxn;
+    site **root_site, ***curr_site;
+    jnxn *p, *q;
+    site *r;
+
+    jnxn** jnxn_arr[MAXSPLIT];
+    int n_split;
 
     timestamp = time(NULL);
 
@@ -227,13 +270,17 @@ int main(int argc,char* argv[]) {
         exit(1);
     }
 
-    root = (node**)  malloc( sizeof(node*)  * (header->n_targets + ARRAY_MARGIN) );
-    curr = (node***) malloc( sizeof(node**) * (header->n_targets + ARRAY_MARGIN) );
+    root_jnxn = (jnxn**)  malloc( sizeof(jnxn*)  * (header->n_targets + ARRAY_MARGIN) );
+    curr_jnxn = (jnxn***) malloc( sizeof(jnxn**) * (header->n_targets + ARRAY_MARGIN) );
+    root_site = (site**)  malloc( sizeof(site*)  * (header->n_targets + ARRAY_MARGIN) );
+    curr_site = (site***) malloc( sizeof(site**) * (header->n_targets + ARRAY_MARGIN) );
 
 
     for(i=0; i < header->n_targets; i++) {
-	root[i] = NULL;
-	curr[i] = &root[i];
+	root_jnxn[i] = NULL;
+	curr_jnxn[i] = &root_jnxn[i];
+	root_site[i] = NULL;
+        curr_site[i] = &root_site[i];
     }
 
     b = bam_init1();
@@ -264,7 +311,8 @@ int main(int argc,char* argv[]) {
 
 	pos = beg = c->pos + 1;
 
-	while((*curr[ref_id])!=NULL && (*curr[ref_id])->beg < beg) curr[ref_id] = &((*curr[ref_id])->down);
+	while((*curr_jnxn[ref_id])!=NULL && (*curr_jnxn[ref_id])->beg < beg) curr_jnxn[ref_id] = &((*curr_jnxn[ref_id])->down);
+	while((*curr_site[ref_id])!=NULL && (*curr_site[ref_id])->pos < beg) curr_site[ref_id] = &((*curr_site[ref_id])->next);
 
 	if(ref_id != ref_id_prev  && ref_id_prev >= 0) {
 	    progressbar(1, 1, header->target_name[ref_id_prev], verbose);
@@ -274,7 +322,7 @@ int main(int argc,char* argv[]) {
 	for(;k<beg;k++) progressbar(k, header->target_len[ref_id], header->target_name[ref_id], verbose);
 
 	offset = 0;
-	node_ptr = curr[ref_id];
+	n_split = 0;
         for(i = 0; i < c->n_cigar; i++) {
 	    increm = cigar[i] >> 4;
 	    switch(cigar[i] & 0x0F) {
@@ -285,7 +333,11 @@ int main(int argc,char* argv[]) {
 					break;
 		case BAM_CDEL:		pos += increm;		// deletion from the reference (technically the same as 'N') pointer moves
                                         break;
-                case BAM_CREF_SKIP:	node_ptr = update_node(node_ptr, pos - 1, pos + increm, mapped_strand, offset);
+                case BAM_CREF_SKIP:	if(n_split>MAXSPLIT) break;
+					jnxn_arr[n_split++] = curr_jnxn[ref_id];
+					for(j=0;j<n_split;j++) jnxn_arr[j] = update_jnxn(jnxn_arr[j], pos - 1, pos + increm, mapped_strand, offset);
+					update_site(curr_site[ref_id], pos - 1, mapped_strand, offset, 0);
+					update_site(curr_site[ref_id], pos + increm, mapped_strand, offset, 0);
 					pos += increm;
 				 	break;
 		case BAM_CSOFT_CLIP:	offset += increm;
@@ -298,7 +350,7 @@ int main(int argc,char* argv[]) {
     if(verbose) progressbar(1, 1, header->target_name[ref_id_prev], verbose); 
 
     for(i = 0; i < header->n_targets; i++) {
-	for(p = root[i];p != NULL; p = p->down) {
+	for(p = root_jnxn[i];p != NULL; p = p->down) {
 	    for(s=0; s<2; s++) {
                 for(k = 0; k < nbins; k++) {
 		    *buff=0;
@@ -317,7 +369,6 @@ int main(int argc,char* argv[]) {
     bam_close(bam_input);
     bam_destroy1(b);
 
-/*
     if(ssc_file == NULL || ssc_file_name[0]==0) {
     	current_time = time(NULL);
     	fprintf(log_file,"Completed in %1.0lf seconds\n",difftime(current_time,timestamp));
@@ -328,14 +379,14 @@ int main(int argc,char* argv[]) {
     header = bam_header_read(bam_input);
 
     for(i = 0; i < header->n_targets; i++) {
-        site *qtr = root_site[i];
-        while(qtr != NULL) {
+        r = root_site[i];
+        while(r != NULL) {
 	    for(j=0; j<2; j++) {
             	for(k = 0; k < nbins; k++) {
-		    qtr->count[j][k] = 0;
+		    r->count[j][k] = 0;
 		}
 	    }
-            qtr = qtr->next;
+            r = r->next;
         }
 	curr_site[i] = &root_site[i];
     }
@@ -383,14 +434,14 @@ int main(int argc,char* argv[]) {
         for(i = 0; i < c->n_cigar; i++) {
             increm = cigar[i] >> 4;
             switch(cigar[i] & 0x0F) {
-                case BAM_CMATCH:	qtr = (*curr_site[ref_id]);
-					while(qtr != NULL && qtr->pos < pos + increm) {
-					    if(qtr->pos > pos && qtr->pos < pos + increm -1 ) {
-						int bin = qtr->pos - pos + offset;
+                case BAM_CMATCH:	r = (*curr_site[ref_id]);
+					while(r != NULL && r->pos < pos + increm) {
+					    if(r->pos > pos && r->pos < pos + increm -1 ) {
+						int bin = r->pos - pos + offset;
 					 	if(bin >= nbins) bin = nbins -1;
-						qtr->count[mapped_strand][bin]++;
+						r->count[mapped_strand][bin]++;
 					    }
-					    qtr = qtr->next;
+					    r = r->next;
 					}
 				        pos += increm;  	// match to the reference
 					offset += increm;	//
@@ -414,21 +465,20 @@ int main(int argc,char* argv[]) {
 
 
     for(i = 0; i < header->n_targets; i++) {
-        qtr = root_site[i];
-        while(qtr != NULL) {
+        r = root_site[i];
+        while(r != NULL) {
 	    for(j=0; j<2; j++) { 
             	for(k = 0; k < nbins; k++) {
-            	    if(qtr->count[j][k] > 0) fprintf(ssc_file, "%s\t%i\t%i\t%c\t%i\t%i\n", header->target_name[i], qtr->pos, qtr->pos, strand_i2c(STRAND[j]*stranded), k, qtr->count[j][k]);
+            	    if(r->count[j][k] > 0) fprintf(ssc_file, "%s\t%i\t%i\t%c\t%i\t%i\n", header->target_name[i], r->pos, r->pos, strand_i2c(STRAND[j]*stranded), k, r->count[j][k]);
 		}
 	    }
-            qtr = qtr->next;
+            r = r->next;
         }
     }
     fclose(ssc_file);
     bam_header_destroy(header);
     bam_close(bam_input);
     bam_destroy1(b);
-*/
 
     current_time = time(NULL);
     fprintf(log_file,"Completed in %1.0lf seconds\n",difftime(current_time,timestamp));

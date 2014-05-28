@@ -31,6 +31,8 @@ Version 2.0	Apr 1, 2014
 		6. maxnh the max value of the NH tag (set to 1 for uniquely mapped reads): added
 		7. counting lim_reads now moven to the beginning of the loop 
 
-
-
+Version 3.0	May 28, 2014
+		1. Simplier ordering function in lists for sjcount
+		2. MAIN: sjcount now counts also mulisplit reads
+		3. The output format has changed for ssj (chr, str, nsplit, positions, offset, count)
 

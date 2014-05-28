@@ -40,7 +40,7 @@ TESTDIR=test/
 test :: ${TESTDIR}control.ssj ${TESTDIR}control.ssc
 	sort ${TESTDIR}test.ssj | cmp ${TESTDIR}control.ssj
 	sort ${TESTDIR}test.ssc | cmp ${TESTDIR}control.ssc
-	#===> tests passed successfully <===#
+	#===> tests v2 passed successfully <===#
 
 PARAMS=-lim 1000000 -nbins 50 -read1 0 -read2 0
 
@@ -61,16 +61,20 @@ clean ::
 
 ######################################################################################################################
 
-${TESTDIR}test.ssj3 : ${TESTDIR}test.bam sjcount3
-	sjcount3 -bam ${TESTDIR}test.bam ${PARAMS} | sort > ${TESTDIR}test.ssj3
+${TESTDIR}test.ssj3 ${TESTDIR}test.ssc3 : ${TESTDIR}test.bam sjcount3
+	sjcount3 -bam ${TESTDIR}test.bam ${PARAMS} -ssj ${TESTDIR}test.ssj3 -ssc ${TESTDIR}test.ssc3
 
 ${TESTDIR}control.ssj3 : ${TESTDIR}test.bam  ${TESTDIR}sam2sj-all.pl
 	${SAMTOOLS_DIR}samtools view ${TESTDIR}test.bam  | perl ${TESTDIR}sam2sj-all.pl ${PARAMS} | sort > ${TESTDIR}control.ssj3
 
+${TESTDIR}control.ssc3 : ${TESTDIR}test.bam ${TESTDIR}sam2sb.pl
+	${SAMTOOLS_DIR}samtools view ${TESTDIR}test.bam  |  perl ${TESTDIR}sam2sb.pl -ssj ${TESTDIR}control.ssj ${PARAMS} | sort > ${TESTDIR}control.ssc3
 
-test3 :: ${TESTDIR}test.ssj3 ${TESTDIR}control.ssj3
-	cmp ${TESTDIR}test.ssj3 ${TESTDIR}control.ssj3
-	#===> tests passed successfully <===#
+
+test3 :: ${TESTDIR}test.ssj3 ${TESTDIR}control.ssj3 ${TESTDIR}test.ssc3 ${TESTDIR}control.ssc3
+	sort ${TESTDIR}test.ssj3 | cmp ${TESTDIR}control.ssj3
+	sort ${TESTDIR}test.ssc3 | cmp ${TESTDIR}control.ssc3
+	#===> tests v3 passed successfully <===#
 
 
 clean ::
