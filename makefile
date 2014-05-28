@@ -68,7 +68,7 @@ ${TESTDIR}control.ssj3 : ${TESTDIR}test.bam  ${TESTDIR}sam2sj3.pl
 	${SAMTOOLS_DIR}samtools view ${TESTDIR}test.bam  | perl ${TESTDIR}sam2sj3.pl ${PARAMS} | sort > ${TESTDIR}control.ssj3
 
 ${TESTDIR}control.ssc3 : ${TESTDIR}test.bam ${TESTDIR}sam2sb3.pl
-	${SAMTOOLS_DIR}samtools view ${TESTDIR}test.bam  |  perl ${TESTDIR}sam2sb3.pl -ssj ${TESTDIR}control.ssj ${PARAMS} | sort > ${TESTDIR}control.ssc3
+	${SAMTOOLS_DIR}samtools view ${TESTDIR}test.bam  |  perl ${TESTDIR}sam2sb3.pl -ssj ${TESTDIR}test.ssj3 ${PARAMS} | sort > ${TESTDIR}control.ssc3
 
 
 test3 :: ${TESTDIR}test.ssj3 ${TESTDIR}control.ssj3 ${TESTDIR}test.ssc3 ${TESTDIR}control.ssc3

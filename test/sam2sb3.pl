@@ -25,7 +25,9 @@ for($s=0; $s<2; $s++) {
 
 open FILE,$ssj || die();
 while($line=<FILE>) {
-    ($chr, $beg, $end, $str) = split /\t/, $line;
+    ($id, $deg) = split /\t/, $line;
+    next unless($deg==1);
+    ($chr, $beg, $end, $str) = split /\_/, $id;
     $site{$chr}{$beg} = $site{$chr}{$end} = 1;
 }
 
