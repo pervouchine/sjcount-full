@@ -45,9 +45,9 @@ while(<STDIN>){
 	    case 'D' {  $pos += $increment;  
 		     }
 	    case 'N' {  $bin = ($offset>=$nbins) ? $nbins - 1 : $offset;
-			push @array, join("^", $pos - 1, $pos + $increment);
+			push @array, join("_", $pos - 1, $pos + $increment);
 			for(@b = @array; @b>0; shift(@b)) {
-			    $count{join("\t", $ref, $STRAND[$strand], 0+@b, join("-", @b), $bin)}++; 
+			    $count{join("\t", join("_", $ref, @b, $STRAND[$strand]), 0+@b, $bin)}++;
 			}
 			$pos += $increment; 
 		     }

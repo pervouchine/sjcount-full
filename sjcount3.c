@@ -355,9 +355,9 @@ int main(int argc,char* argv[]) {
                 for(k = 0; k < nbins; k++) {
 		    *buff=0;
 		    for(q = p, j = 0; q != NULL; q = q->right, j++) {
-			if(j>0) strcat(buff, (char*)("-"));
-			sprintf(buff+strlen(buff), "%i^%i",q->beg, q->end);
-			if(q->count[s][k]>0) fprintf(ssj_file, "%s\t%c\t%i\t%s\t%i\t%i\n", header->target_name[i], strand_i2c(STRAND[s]*stranded), j + 1, buff, k, q->count[s][k]);
+			//if(j>0) strcat(buff, (char*)("-"));
+			sprintf(buff+strlen(buff), "_%i_%i",q->beg, q->end);
+			if(q->count[s][k]>0) fprintf(ssj_file, "%s%s_%c\t%i\t%i\t%i\n", header->target_name[i], buff, strand_i2c(STRAND[s]*stranded), j + 1, k, q->count[s][k]);
 		    }
 		}
 	    }
@@ -469,7 +469,7 @@ int main(int argc,char* argv[]) {
         while(r != NULL) {
 	    for(j=0; j<2; j++) { 
             	for(k = 0; k < nbins; k++) {
-            	    if(r->count[j][k] > 0) fprintf(ssc_file, "%s\t%i\t%i\t%c\t%i\t%i\n", header->target_name[i], r->pos, r->pos, strand_i2c(STRAND[j]*stranded), k, r->count[j][k]);
+            	    if(r->count[j][k] > 0) fprintf(ssc_file, "%s_%i_%c\t%i\t%i\t%i\n", header->target_name[i], r->pos, strand_i2c(STRAND[j]*stranded), 0, k, r->count[j][k]);
 		}
 	    }
             r = r->next;
