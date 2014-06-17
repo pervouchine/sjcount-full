@@ -56,14 +56,11 @@ Input:   a (sorted) BAM file
 
 Options:
 
-	DEPRECATED: -maxlen upper limit on intron length, 0 = no limit (default=0)
-	DEPRECATED: -minlen lower limit on intron length, 0 = no limit (default=0)
-	DEPRECATED: -margin length, minimum number of flanking nucleotides to support SJ or EB, (default=0)
 	-read1 0/1, reverse complement read1 no/yes (default=1)
 	-read2 0/1, reverse complement read2 no/yes (default=0)
-	DEPRECATED: -binsize size for offsets, (default=1)
 	-nbins number of bins for offsets, (default=1)
 	-lim nreads stop after nreads, (default=no limit)
+        -maxnh, the max value of the NH tag, (default=none)
 	-unstranded, force strand=0
 	-quiet, suppress verbose output
 
@@ -76,13 +73,3 @@ Output:	-ssj: Splice Junction counts, tab-delimited  (default=stdout)
 
 DETAILS
 	See documentation in latex/sjcount_v3.pdf
-
- 
-
-
-
-
-
-
-
-
