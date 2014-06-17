@@ -208,11 +208,12 @@ chr1   AGTCTAGGGACGGCATAGGAGGTGAGCATTTGTGTACGCAGATCTACAAAACATGTGTCACGGATAGGATCG
 Q1            GGACGGCATAGGAG....................ATCT      
 Q7             GACGGCATAGGAGGTGA
 Q8              ACGGCATAGGAGGTGAG
-Q9               CGGC.......................................TGTGTCACGGATA
+Q9               CGGCATAGGA-GTGAGC
+Q9                GGCAT.....................................TGTGTCACGGA
 \end{verbatim}
 \caption{Reads overlapping exon boundaries\label{fig::03}}
 \end{figure}
-In this example, Q7 and Q8 overlap the exon boundary at position 31, while Q1 and Q9 
+In this example, Q7 and Q8 overlap the exon boundary at position 31, while Q1, Q9, and Q10 
 do not (note that Q1 defines exon boundary, but it would be incorrect to count it as
 contributing to intron retention).
 
@@ -220,7 +221,10 @@ contributing to intron retention).
 In principle there is not too much to benchmark in {\em sjcount} because it only does the job of counting.
 We nevertheless test the performance of {\em sjcount} with respect to a na{\"\i}ve counting routine 
 implemented in {\tt perl}. In order to initiate benchmark, call {\tt 'make test'} in {\em sjcount} directory.
-It will download a small BAM file, run {\em sjcount}, and prompt of the outputs are different.
+It will download a small BAM file, run {\em sjcount}, and prompt of the outputs are different. Offset is 
+also defined in this case as the position of the alignned exon boundary in the query sequence. For example,
+the offset of Q7 in Figure~\ref{fig::03} is equal to 13. The position of exon boundary is denoted by {\tt chr\_pos\_str}, 
+e.g., {\tt chr1\_31\_+} and {\tt chr1\_52\_+} as in Figure~\ref{fig::03}. The number of splis is equal to 0.
 
 \bibliography{sjcount}
 \bibliographystyle{abbrv}
