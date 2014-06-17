@@ -177,14 +177,13 @@ to know how many reads aligned to a certain split regardless of the offset. This
 sum of counts for the given alignment over all values of offset. In other words, the total number of counts
 is obtained from offset-specific counts by aggregation using the function $f(x_1,\dots,x_n) = x_1+\dots+x_n$.
 
-We also report two other important feature that are obtained from offset-specific counts by aggregation 
-using different functions. The number of {\em staggered} counts is the result of aggregation using 
-$f(x_1,\dots,x_n) = \theta(x_1)+\dots+\theta(x_n)$, where $\theta(x)=1$ for $x>0$ and $\theta(x)=0$ for 
-$x\le0$. The {\em entropy} of the distribution of counts by offsets is obtained by using 
+Offset-specific counts are quite useful when aggregating by using different functions. For example, the number 
+of {\em staggered} counts is the result of aggregation using  $f(x_1,\dots,x_n) = \theta(x_1)+\dots+\theta(x_n)$, 
+where $\theta(x)=1$ for $x>0$ and $\theta(x)=0$ for $x\le0$. Another useful function is {\em entropy}, which
+is obtained from the offset-specific counts by aggregation with
 $$f(x_1,\dots,x_n) = \log_2(\sum\limits_{i=1}^nx_i) - \frac{\sum\limits_{i=1}^nx_i\log_2(x_i)}{\sum\limits_{i=1}^nx_i}.$$
-
-The entropy and the number of staggered reads are two important characteristics that can be used to 
-filter out non-uniform distiburtion of read counts.
+The entropy and the number of staggered reads can be used to filter out artefactual read counts. Note that 
+{\em sjcount} only reports offset-specific counts, while the aggregation is left to the user. 
 
 \bibliography{sjcount}
 \bibliographystyle{abbrv}
