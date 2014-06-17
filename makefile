@@ -28,7 +28,6 @@ sjcount_v2 : sjcount_v2.c progressbar.o ${SAMTOOLS_DIR}libbam.a
 sjcount_v3 : sjcount_v3.c progressbar.o ${SAMTOOLS_DIR}libbam.a
 	$(GCC) -I ${SAMTOOLS_DIR} sjcount_v3.c progressbar.o ${SAMTOOLS_DIR}libbam.a -lz -o sjcount_v3
 
-
 ${LATEXDIR}sjcount_v3.pdf : ${LATEXDIR}sjcount_v3.tex
 	pdflatex -output-directory=${LATEXDIR} ${LATEXDIR}sjcount_v3.tex
 	pdflatex -output-directory=${LATEXDIR} ${LATEXDIR}sjcount_v3.tex

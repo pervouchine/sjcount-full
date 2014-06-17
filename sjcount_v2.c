@@ -34,6 +34,7 @@ int nbins   = 1;
 
 const int STRAND[2] = {1, -1};
 
+
 class site {
   public:
     int pos;
