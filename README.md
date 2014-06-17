@@ -50,7 +50,7 @@ This error has to do with big zip libraries, not with samtools.
 
 USAGE
 
- ./sjcount -bam bam_file [-ssj junctions_output] [-ssc boundaries_output] [-log log_file] [-maxlen max_intron_length] [-minlen min_intron_length] [-read1 0|1] [-read2 0|1] [-nbins number_of_bins] [-binsize bin_size] [-lim number_of_lines] [-quiet]
+ ./sjcount_v3 -bam bam_file [-ssj junctions_output] [-ssc boundaries_output] [-log log_file] [-maxlen max_intron_length] [-minlen min_intron_length] [-read1 0|1] [-read2 0|1] [-nbins number_of_bins] [-binsize bin_size] [-lim number_of_lines] [-quiet]
 
 Input:   a (sorted) BAM file
 
@@ -75,7 +75,7 @@ Output:	-ssj: Splice Junction counts, tab-delimited  (default=stdout)
 ============================================================================
 
 DETAILS
-	See documentation in latex/sjcount.pdf
+	See documentation in latex/sjcount_v3.pdf
 
  
 

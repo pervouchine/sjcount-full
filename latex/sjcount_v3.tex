@@ -14,28 +14,29 @@
 
 \begin{document}
 
-\title{Fast quantification of splice junctions from RNA-seq data by {\em sjcount} v3.0}
+\title{Quantification of Splice Junctions in RNA-seq Data by {\em sjcount} v3.0}
 
 \author{Dmitri D. Pervouchine\thanks{email: dp@crg.eu}}\affil{Centre for Genomic Regulation (CRG), Barcelona, Spain}
 
 \date{\today}
 \maketitle
+\tableofcontents
 
 \section{Synopsis}
 
 The purpose of {\em sjcount} is to provide a fast utility for counting splice junctions in BAM files. 
 It is the annotation-agnostic version of \href{https://github.com/pervouchine/bam2ssj}{bam2ssj}. 
 This document describes the version {\bf v3.0} of {\em sjcount}. The older versions of {\em sjcount}
-(v1.0, v2.0) is also included in the package inder the name {\em deprecated}.
+(v1.0, v2.0) is also included in the package under the name {\em deprecated}.
 
-\section{Changes since v2.0}
-The has been a substrantial change between v2.0 and v3.0.
+\section{Changes since previous version}
+The has been a substantial change between v2.0 and v3.0.
 \begin{enumerate}
-\item The utility now counts and reports reads with multisplits
-\item Accordingly, the output format has changed to account for multisplits
-\item A simplier and more efficient data structure is now used to store and parse multisplits
-\item Test rountines are now added to check the quality and integrity of the output as compared to the output of 
-a perl script with easily controlled syntax
+\item The utility now counts and reports reads with multi-splits
+\item Accordingly, the output format has changed to account for multi-splits
+\item A simpler and more efficient data structure is now used to store and parse multi-splits
+\item Test routines are now added to check the quality and integrity of the output as compared to the output of 
+a pearl script with easily controlled syntax
 \end{enumerate}
 
 \section{Installation and usage}
@@ -70,7 +71,7 @@ chr1_100_400_+            1       33      1
 ...                       ...     ...     ...
 \end{verbatim}
 where the first column contains the coordinates of the split alignment (including multi-splits, see below). The second 
-column contains the numer of splits. The third column contains the offset sefined as the distance within the short read 
+column contains the number of splits. The third column contains the offset defined as the distance within the short read 
 sequence of the latest split (defined below). The last column is the respective count, i.e., the number of split-mapped 
 reads with the given combination of alignment coordinates and offset. 
 
@@ -80,11 +81,12 @@ and 200, and then between positions 300 and 400. The coordinates are 1-based and
 nucleotides. The strand is denoted by '+' and '-' for stranded data or by '.' for unstranded data.
 
 The second output is also a tab-delimited file which contains the counts of read alignments that {\em overlap} exon 
-boundries (exon boundries are defined by splice junctions in the previous file). In this version all alignments that 
+boundaries (exon boundaries are defined by splice junctions in the previous file). In this version all alignments that 
 overlap an exon boundary by at least one nucleotide are counted (in older versions only continuous alignments were counted. 
-This second file is optional and is needed to compute the completness of splicing index~\cite{pmid23172860, pmid22955974}.
+This second file is optional and is needed to compute the completeness of splicing index~\cite{pmid23172860, pmid22955974}.
 
 \section{Method}
+\subsection{Definitions}
 By definition, we say that we observe a {\em splice junction} each time we see an 'N' symbol in the CIGAR attribute 
 of the alignment. If the CIGAR attribute contains several N's, then we have a {\em multi-split} or $n$-split, where $n$ 
 is the number of N's in CIGAR. In this terms, each 1-split defines one splice junction while each $n$-split defines
@@ -121,14 +123,15 @@ in {\tt chr1\_64\_78\_+} as having 1 split, and in {\tt chr1\_31\_52\_64\_78\_+}
 One may want to subset the output to regular splice junctions by requiring the second column be 
 equal to one.
 
+\subsection{Offset-specific counts}
 Artifacts may arise from combining counts that come from different starting positions of the alignment. We 
 define the {\em offset} to be the distance ({\em in the query sequence!}) from the first alignment position 
 to the corresponding 'N'. For instance, the junction $\SJ_1$ in Figure~\ref{fig::01} has offset $17$, while
-the junction $\SJ_1$ has offset $29$. The offset of the multi-split is defined to be the offest of it's last 
+the junction $\SJ_1$ has offset $29$. The offset of the multi-split is defined to be the offset of it's last 
 N, i.e., $29$ in this case. Since the offset is defined as a position in the query sequence, its value
 cannot exceed the read length.
 
-Some offsets may give artifactually large read counts corresponding to PCR artefacts~\cite{pmid22537040}. 
+Some offsets may give artifactually large read counts corresponding to CPR artifacts~\cite{pmid22537040}. 
 In Figure~\ref{fig::02} we show six split reads supporting the same splice junction with offsets~14 (Q1), 
 12 (Q2--Q4), and~8 (Q5--Q6). Note that offsets appear decreasing when sequentially processing lines a sorted 
 BAM file.
@@ -140,7 +143,7 @@ BAM file.
        |        |         |         |         |         |         |         |
        123456789012345678901234567890123456789012345678901234567890123456789012
 
-Ref    AGTCTAGGGACGGCATAGGAGGTGAGCATTTGTGTACGCAGATCTACAAAACATGTGTCACGGATAGGATCG
+chr1   AGTCTAGGGACGGCATAGGAGGTGAGCATTTGTGTACGCAGATCTACAAAACATGTGTCACGGATAGGATCG
 
 Q1            GGACGGCATAGGAG....................ATCT      
 Q2              ACGGCATAGGAG....................ATCTAC    
@@ -152,7 +155,7 @@ Q6                  CATAGGAG....................ATCTACAAAA
 \caption{Split-mapped reads support the same splice junction with different offsets\label{fig::02}}
 \end{figure}
 
-The quantification of abundance is done as follows. We initialize and keep $nbins$ separate counters 
+Offset-specific counts are generated as follows. We initialize and keep $nbins$ separate counters
 for each $n$-split. For each instance of $n$-split, we increment the counter corresponding to its 
 offset. If the offset is larger than or equal to $nbins$ then it is  set to be equal to $nbins-1$.
 
@@ -172,6 +175,7 @@ Ref_31_52_+     1       12      3
 Ref_31_52_+     1       14      1
 \end{verbatim}
 
+\subsection{Aggregation}
 One single number is usually reported for each splice junction as an endpoint. Normally, the user wants 
 to know how many reads aligned to a certain split regardless of the offset. This number is equal to the 
 sum of counts for the given alignment over all values of offset. In other words, the total number of counts
@@ -183,7 +187,40 @@ where $\theta(x)=1$ for $x>0$ and $\theta(x)=0$ for $x\le0$. Another useful func
 is obtained from the offset-specific counts by aggregation with
 $$f(x_1,\dots,x_n) = \log_2(\sum\limits_{i=1}^nx_i) - \frac{\sum\limits_{i=1}^nx_i\log_2(x_i)}{\sum\limits_{i=1}^nx_i}.$$
 The entropy and the number of staggered reads can be used to filter out artefactual read counts. Note that 
-{\em sjcount} only reports offset-specific counts, while the aggregation is left to the user. 
+{\em sjcount} only reports offset-specific counts, while the aggregation is left to the user. These 
+aggregation functions are implemented in the splicing pipeline package 
+\href{https://github.com/pervouchine/ipsa}{https://github.com/pervouchine/ipsa}.
+
+\subsection{Reads overlapping exon boundaries}
+By definition, we say that an alignment overlaps an exon boundary, if the terminal exonic nucleotide and the 
+following first intronic nucleotide is also aligned. For example, consider exon boundaries defined by the alignment Q1
+in Figure~\ref{fig::02}.
+%
+\begin{figure}[h]
+\footnotesize
+\begin{verbatim}
+       10       20        30        40        50        60        70        80
+       |        |         |         |         |         |         |         |
+       123456789012345678901234567890123456789012345678901234567890123456789012
+
+chr1   AGTCTAGGGACGGCATAGGAGGTGAGCATTTGTGTACGCAGATCTACAAAACATGTGTCACGGATAGGATCG
+
+Q1            GGACGGCATAGGAG....................ATCT      
+Q7             GACGGCATAGGAGGTGA
+Q8              ACGGCATAGGAGGTGAG
+Q9               CGGC.......................................TGTGTCACGGATA
+\end{verbatim}
+\caption{Reads overlapping exon boundaries\label{fig::03}}
+\end{figure}
+In this example, Q7 and Q8 overlap the exon boundary at position 31, while Q1 and Q9 
+do not (note that Q1 defines exon boundary, but it would be incorrect to count it as
+contributing to intron retention).
+
+\section{Benchmark}
+In principle there is not too much to benchmark in {\em sjcount} because it only does the job of counting.
+We nevertheless test the performance of {\em sjcount} with respect to a na{\"\i}ve counting routine 
+implemented in {\tt perl}. In order to initiate benchmark, call {\tt 'make test'} in {\em sjcount} directory.
+It will download a small BAM file, run {\em sjcount}, and prompt of the outputs are different.
 
 \bibliography{sjcount}
 \bibliographystyle{abbrv}
