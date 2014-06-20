@@ -36,12 +36,12 @@ ${LATEXDIR}sjcount_v3.pdf : ${LATEXDIR}sjcount_v3.tex
 
 TESTDIR=test/
 
-PARAMS=-lim 1000000 -nbins 50 -read1 0 -read2 0
+PARAMS=-nbins 50 -read1 0 -read2 0 -lim 1000000
 
 ${TESTDIR}test.bam : 
 	wget genome.crg.es/~dmitri/export/sjcount/test.bam -O ${TESTDIR}test.bam
 
-${TESTDIR}test.ssj ${TESTDIR}test.ssc : ${TESTDIR}test.bam sjcount
+${TESTDIR}test.ssj ${TESTDIR}test.ssc : ${TESTDIR}test.bam sjcount_v3
 	sjcount_v3 -bam ${TESTDIR}test.bam ${PARAMS} -ssj ${TESTDIR}test.ssj -ssc ${TESTDIR}test.ssc
 
 ${TESTDIR}control.ssj : ${TESTDIR}test.bam  ${TESTDIR}sam2sj3.pl

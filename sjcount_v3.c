@@ -24,7 +24,7 @@
 #include <bam.h>
 #include "progressbar.h"
 
-#define MAXFILEBUFFLENGTH 1000
+#define MAXFILEBUFFLENGTH 4096
 #define ARRAY_MARGIN 2
 #define INFTY 65535
 #define MAXSPLIT 256
@@ -32,9 +32,20 @@
 const char version[100] = "v3.0";
 
 int nbins   = 1;
+int stranded = 1;
+FILE *input_file;
+FILE *ssj_file;
+FILE *ssc_file;
+FILE* log_file=stderr;
 
 const int STRAND[2] = {1, -1};
 
+//*************************************************************************************************************************//
+
+char strand_i2c(int i) {
+    if(i>0) return('+');
+    if(i<0) return('-');
+}    
 
 //*************************************************************************************************************************//
 
@@ -74,6 +85,26 @@ jnxn** update_jnxn(jnxn **ptr, int beg, int end, int strand, int offset) {
     return(&((*ptr)->right));
 }
 
+void print_jnxn(char* prefix, jnxn* p, int level) {
+    char buff[MAXFILEBUFFLENGTH];
+    int prefix_l, s, k;
+    strcpy(buff, prefix);
+    prefix_l = strlen(buff);
+    for(;p != NULL; p = p->down) {
+        strcpy(buff, prefix);
+        sprintf(buff + prefix_l, "_%i_%i", p->beg, p->end);
+        for(s=0; s<2; s++) {
+            for(k = 0; k < nbins; k++) {
+                if(p->count[s][k]>0) {
+                    fprintf(ssj_file, "%s_%c\t%i\t%i\t%i\n", buff, strand_i2c(STRAND[s]*stranded), level, k, p->count[s][k]);
+                }
+            }
+        }
+	if(p->right != NULL) print_jnxn(buff, p->right, level + 1);
+    }
+}
+
+
 //*************************************************************************************************************************//
 
 class site {
@@ -110,20 +141,9 @@ void update_site(site **ptr, int pos, int strand, int offset, int v) {
 
 //*************************************************************************************************************************//
 
-char strand_i2c(int i) {
-    if(i>0) return('+');
-    if(i<0) return('-');
-    return('.');
-}
-
 int main(int argc,char* argv[]) {
     time_t timestamp, current_time;
     int i,j,k,s,a,n;
-
-    FILE *input_file;
-    FILE *ssj_file;
-    FILE *ssc_file;
-    FILE* log_file=stderr;
 
     bamFile bam_input;
     bam_header_t *header;
@@ -146,7 +166,6 @@ int main(int argc,char* argv[]) {
     int rev_compl[2] = {1,0};
     int limit_counts = 0;
     int verbose = 1;
-    int stranded = 1;
 
     int n_reads = 0;
     int max_nh = 0;
@@ -348,21 +367,11 @@ int main(int argc,char* argv[]) {
 	    }
        	}
     }
+
     if(verbose) progressbar(1, 1, header->target_name[ref_id_prev], verbose); 
 
     for(i = 0; i < header->n_targets; i++) {
-	for(p = root_jnxn[i];p != NULL; p = p->down) {
-	    for(s=0; s<2; s++) {
-                for(k = 0; k < nbins; k++) {
-		    *buff=0;
-		    for(q = p, j = 0; q != NULL; q = q->right, j++) {
-			//if(j>0) strcat(buff, (char*)("-"));
-			sprintf(buff+strlen(buff), "_%i_%i",q->beg, q->end);
-			if(q->count[s][k]>0) fprintf(ssj_file, "%s%s_%c\t%i\t%i\t%i\n", header->target_name[i], buff, strand_i2c(STRAND[s]*stranded), j + 1, k, q->count[s][k]);
-		    }
-		}
-	    }
-	}
+	print_jnxn(header->target_name[i], root_jnxn[i], 1);
     }
 
     fclose(ssj_file);
