@@ -184,7 +184,7 @@ int main(int argc,char* argv[]) {
 
     if(argc==1) {
 	fprintf(stderr, "This utility (%s) counts split reads supporting splice junctions and continuous reads that cover exon boundaries\n", version);
-        fprintf(stderr, "Type %s -h for help\n",argv[0]);
+        fprintf(stderr, "Type %s -h for help\n\n",argv[0]);
         exit(1);
     }
 

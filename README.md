@@ -61,8 +61,8 @@ Options:
 	-nbins number of bins for offsets, (default=1)
 	-lim nreads stop after nreads, (default=no limit)
 	-maxnh, the max value of the NH tag, (default=none)
-	-unstranded, force strand=0
 	-continuous, no mismatches when overlapping splice boundaries
+	-unstranded, force strand=0
 	-quiet, suppress verbose output
 
 Output:	-ssj: Splice Junction counts, tab-delimited  (default=stdout)
