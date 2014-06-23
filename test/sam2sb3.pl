@@ -11,6 +11,7 @@ parse_command_line( read1 => {description=>'flip read1 yes/no (1/0)', default=>1
 		    read2 => {description=>'flip read2 yes/no (1/0)', default=>0},
 		      ssj => {description=>'ssj file defining junctions', ifunreadable=>"ssj file not specified"},
 		    nbins => {description=>'number of bins', default=>1},
+		    continuous =>{description=>'continuous overlap only', store=>T},
 		    lim   => {description=>'stop after this number of lines (for debug)',default=>0});
  
 $BAM_FREAD1 = 0x40;
@@ -38,6 +39,8 @@ while(<STDIN>){
 
     $n++;
     last if($n>$lim && $lim>0);
+
+    next if($continuous && !($cigar=~/^(\d+)(\w)$/));
 
     @array = ();
     $offset = 0;

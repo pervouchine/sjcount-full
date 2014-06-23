@@ -62,6 +62,7 @@ Options:
 	-lim nreads stop after nreads, (default=no limit)
 	-maxnh, the max value of the NH tag, (default=none)
 	-unstranded, force strand=0
+	-continuous, no mismatches when overlapping splice boundaries
 	-quiet, suppress verbose output
 
 Output:	-ssj: Splice Junction counts, tab-delimited  (default=stdout)

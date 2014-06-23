@@ -167,6 +167,7 @@ int main(int argc,char* argv[]) {
     int rev_compl[2] = {1,0};
     int limit_counts = 0;
     int verbose = 1;
+    int continuous = 0;
 
     int n_reads = 0;
     int max_nh = 0;
@@ -182,8 +183,7 @@ int main(int argc,char* argv[]) {
     timestamp = time(NULL);
 
     if(argc==1) {
-	fprintf(stderr, "sjcount %s counts split reads supporting splice junctions and continuous reads that cover exon boundaries\n", version);
-	fprintf(stderr, "This version differs in counting reads that cover exon boundaries\n");
+	fprintf(stderr, "This utility (%s) counts split reads supporting splice junctions and continuous reads that cover exon boundaries\n", version);
         fprintf(stderr, "Type %s -h for help\n",argv[0]);
         exit(1);
     }
@@ -204,6 +204,7 @@ int main(int argc,char* argv[]) {
 
 	if(strcmp(argv[i], "-quiet") == 0) verbose = 0;
 	if(strcmp(argv[i], "-unstranded") == 0) stranded = 0;
+	if(strcmp(argv[i], "-continuous") == 0) continuous = 1;
 
         if(strcmp(argv[i], "-h") ==0 ) {
             fprintf(stderr, "Usage: %s -bam bam_file [-ssj junctions_output] [-ssc boundaries_output] [-log log_file] [-read1 0|1] [-read2 0|1] ",argv[0]);
@@ -216,7 +217,8 @@ int main(int argc,char* argv[]) {
 	    fprintf(stderr, "\t-nbins number of overhang bins, (default=%i)\n", nbins);
 	    fprintf(stderr, "\t-maxnh, the max value of the NH tag, (default=none)\n");
 	    fprintf(stderr, "\t-lim nreads stop after nreads, (default=no limit)\n");
-	    fprintf(stderr, "\t-unstranded, force strand=0\n");
+	    fprintf(stderr, "\t-unstranded, force strand to be '.'\n");
+	    fprintf(stderr, "\t-continuous, no mismatches when overlapping splice boundaries\n");
 	    fprintf(stderr, "\t-quiet, suppress verbose output\n\n"); 
             fprintf(stderr, "Output:\t-ssj: Splice Junction counts, tab-delimited  (default=stdout)\n");
             fprintf(stderr, "\tColumns are: chr, begin, end, strand, offset, count\n");
@@ -270,6 +272,10 @@ int main(int argc,char* argv[]) {
 
     if(stranded==0) {
 	fprintf(log_file,"[Warning: strand is ignored (forced to zero)]\n");
+    }
+
+    if(continuous==1) {
+        fprintf(log_file,"[Warning: only continuous reads overlap splice boundaries]\n");
     }
 
     for(s = 0; s < 2; s++) {
@@ -439,6 +445,8 @@ int main(int argc,char* argv[]) {
         }
 
         for(;k<beg;k++) progressbar(k, header->target_len[ref_id], header->target_name[ref_id], verbose);
+
+	if(continuous && c->n_cigar>1) continue;
 
     	pos = beg;
         offset = 0;
