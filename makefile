@@ -35,20 +35,21 @@ ${LATEXDIR}sjcount_v3.pdf : ${LATEXDIR}sjcount_v3.tex
 ######################################################################################################################
 
 TESTDIR=test/
+TESTBAM=${TESTDIR}test.bam
 
-PARAMS=-nbins 50 -read1 0 -read2 0 -lim 1000000
+PARAMS=-nbins 50 -read1 0 -read2 0 -quiet
 
 ${TESTDIR}test.bam : 
 	wget genome.crg.es/~dmitri/export/sjcount/test.bam -O ${TESTDIR}test.bam
 
-${TESTDIR}test.ssj ${TESTDIR}test.ssc : ${TESTDIR}test.bam sjcount_v3
-	sjcount_v3 -bam ${TESTDIR}test.bam ${PARAMS} -ssj ${TESTDIR}test.ssj -ssc ${TESTDIR}test.ssc
+${TESTDIR}test.ssj ${TESTDIR}test.ssc : ${TESTBAM} sjcount_v3
+	sjcount_v3 -bam ${TESTBAM} ${PARAMS} -ssj ${TESTDIR}test.ssj -ssc ${TESTDIR}test.ssc
 
-${TESTDIR}control.ssj : ${TESTDIR}test.bam  ${TESTDIR}sam2sj3.pl
-	${SAMTOOLS_DIR}samtools view ${TESTDIR}test.bam  | perl ${TESTDIR}sam2sj3.pl ${PARAMS} | sort > ${TESTDIR}control.ssj
+${TESTDIR}control.ssj : ${TESTBAM} ${TESTDIR}sam2sj3.pl
+	${SAMTOOLS_DIR}samtools view ${TESTBAM}  | perl ${TESTDIR}sam2sj3.pl ${PARAMS} | sort > ${TESTDIR}control.ssj
 
-${TESTDIR}control.ssc : ${TESTDIR}test.bam ${TESTDIR}sam2sb3.pl  ${TESTDIR}test.ssj
-	${SAMTOOLS_DIR}samtools view ${TESTDIR}test.bam  |  perl ${TESTDIR}sam2sb3.pl -ssj ${TESTDIR}test.ssj ${PARAMS} | sort > ${TESTDIR}control.ssc
+${TESTDIR}control.ssc : ${TESTBAM} ${TESTDIR}sam2sb3.pl  ${TESTDIR}test.ssj
+	${SAMTOOLS_DIR}samtools view ${TESTBAM}  |  perl ${TESTDIR}sam2sb3.pl -ssj ${TESTDIR}test.ssj ${PARAMS} | sort > ${TESTDIR}control.ssc
 
 
 test :: ${TESTDIR}test.ssj ${TESTDIR}control.ssj ${TESTDIR}test.ssc ${TESTDIR}control.ssc
