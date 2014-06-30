@@ -37,7 +37,7 @@ ${LATEXDIR}sjcount_v3.pdf : ${LATEXDIR}sjcount_v3.tex
 TESTDIR=test/
 TESTBAM=${TESTDIR}test.bam
 
-PARAMS=-nbins 50 -read1 0 -read2 0 -quiet
+PARAMS=-nbins 50 -read1 0 -read2 0 -quiet -lim 100000
 
 ${TESTDIR}test.bam : 
 	wget genome.crg.es/~dmitri/export/sjcount/test.bam -O ${TESTDIR}test.bam
