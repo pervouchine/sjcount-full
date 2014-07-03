@@ -27,16 +27,17 @@
 The purpose of {\em sjcount} is to provide a fast utility for counting splice junctions in BAM files. 
 It is the annotation-agnostic version of \href{https://github.com/pervouchine/bam2ssj}{bam2ssj}. 
 This document describes the version {\bf v3.0} of {\em sjcount}. The older versions of {\em sjcount}
-(v1.0, v2.0) is also included in the package under the name {\em deprecated}.
+(v1.0, v2.0) is also included in the package, but their use is deprecated.
 
 \section{Changes since previous version}
 The has been a substantial change between v2.0 and v3.0.
 \begin{enumerate}
-\item The utility now counts and reports reads with multi-splits
-\item Accordingly, the output format has changed to account for multi-splits
-\item A simpler and more efficient data structure is now used to store and parse multi-splits
+\item The utility now counts and reports all reads with multi-splits (see definitions below)
+\item Accordingly, the output format has changed to accomidate multi-splits. One of the columns reports 
+the number of splits (1 for splice junctions) and another column reports the coordinates of the multi-split (separated by "\_"). 
+\item A simpler and more efficient data structure is now used to store and parse multi-splits.
 \item Test routines are now added to check the quality and integrity of the output as compared to the output of 
-a pearl script with easily controlled syntax
+a pearl script which does the same counting job but has much easier syntax
 \end{enumerate}
 
 \section{Installation and usage}
@@ -54,6 +55,7 @@ where
 \item {\bf read1} 0/1, reverse complement read1 no/yes (default=yes)
 \item {\bf read2} 0/1, reverse complement read2 no/yes (default=no)
 \item {\bf unstranded}, force strand=0
+\item {\bf continuous}, no mismatches when counting overlaps of splice boundaries
 \item {\bf nbins} number of offset bins, (default=1)
 \item {\bf maxnh} the max value of the NH tag, (default=none)
 \item {\bf lim} stop after reading these many lines, (default=no limit)
@@ -70,20 +72,23 @@ chr1_100_200_300_400_+    2       49      1
 chr1_100_400_+            1       33      1
 ...                       ...     ...     ...
 \end{verbatim}
-where the first column contains the coordinates of the split alignment (including multi-splits, see below). The second 
-column contains the number of splits. The third column contains the offset defined as the distance within the short read 
-sequence of the latest split (defined below). The last column is the respective count, i.e., the number of split-mapped 
-reads with the given combination of alignment coordinates and offset. 
+where the first column contains the coordinates of the splits in the alignment (including multi-splits, see below). 
+The second column contains the number of splits. The third column contains the {\em offset} defined as the distance within 
+the short read sequence of the latest split (defined below). The last column is the respective number of counts, i.e., the 
+number of split-reads with the combination of coordinates and offset specified in columns 1 and 3.
 
 For instance, {\tt chr1\_100\_200\_+} denotes an alignment that was split once between positions 100 and 200 on the '+' 
-strand, while {\tt chr1\_100\_200\_300\_400\_+} denotes an alignment that was split twice, first between positions 100 
-and 200, and then between positions 300 and 400. The coordinates are 1-based and always refer to terminal {\em exonic} 
-nucleotides. The strand is denoted by '+' and '-' for stranded data or by '.' for unstranded data.
+strand (referred to as 1-split), while {\tt chr1\_100\_200\_300\_400\_+} denotes an alignment that was split twice 
+(referred to as 2-split), first between positions 100 and 200, and then between positions 300 and 400. There are certain 
+conventions on how many times 1-splits and 2-splits are counted (see below). The coordinates are always {\bf 1-based} 
+and always refer to terminal {\em exonic} nucleotides. The rationale behind it is that in applications we often need to
+find an intron adjacent to the given exon, and adding/subtracting one nucleotide depending on the strand becomes a headache 
+each time. The strand is denoted by '+' and '-' for stranded data or by '.' for unstranded data.
 
 The second output is also a tab-delimited file which contains the counts of read alignments that {\em overlap} exon 
-boundaries (exon boundaries are defined by splice junctions in the previous file). In this version all alignments that 
-overlap an exon boundary by at least one nucleotide are counted (in older versions only continuous alignments were counted. 
-This second file is optional and is needed to compute the completeness of splicing index~\cite{pmid23172860, pmid22955974}.
+boundaries (exon boundaries are the positions of splits, as defined above). All alignments that overlap an exon boundary 
+by at least one nucleotide are counted (although see -continuous flag below). This second file is optional and is needed 
+to compute the completeness of splicing index~\cite{pmid23172860, pmid22955974}.
 
 \section{Method}
 \subsection{Definitions}
@@ -95,8 +100,13 @@ $n$ splice junctions.
 Each multi-split is counted according to the number of splits so that, for example, the 
 alignment {\tt chr1\_100\_200\_300\_400\_500\_600\_+} is counted once as a 3-split, two times 
 as a 2-split ({\tt chr1\_100\_200\_300\_400\_+} and {\tt chr1\_300\_400\_500\_600\_+}), and three times 
-as single-split ({\tt chr1\_100\_200\_+}, {\tt chr\_300\_400\_+}, and {\tt chr1\_500\_600\_+}). 
-The positions of splits are decided entirely by the mapper which produced the alignment.
+as single-split ({\tt chr1\_100\_200\_+}, {\tt chr\_300\_400\_+}, and {\tt chr1\_500\_600\_+}). The rationale behind 
+it is that the user must be able to use {\tt awk} to select $n$-split of interest. Therefore, all the components of,
+for example, a 2-split also have to be counted as 1-splits.
+
+Note that {\bf the positions of splits are decided entirely by the mapper which produced the alignment}. The mission of 
+{\tt sjcount}  is to count (i) the abundancies of $n$-splits and (ii) the abundancies of reads that overlap split 
+positions in $n$-splits. Nothing else.
 
 As an example, consider the multi-split alignment shown in Figure~\ref{fig::01} below. 
 %
@@ -124,17 +134,17 @@ One may want to subset the output to regular splice junctions by requiring the s
 equal to one.
 
 \subsection{Offset-specific counts}
-Artifacts may arise from combining counts that come from different starting positions of the alignment. We 
+Artifacts may arise when combining counts that come from different starting positions of the alignment. We 
 define the {\em offset} to be the distance ({\em in the query sequence!}) from the first alignment position 
 to the corresponding 'N'. For instance, the junction $\SJ_1$ in Figure~\ref{fig::01} has offset $17$, while
 the junction $\SJ_1$ has offset $29$. The offset of the multi-split is defined to be the offset of it's last 
-N, i.e., $29$ in this case. Since the offset is defined as a position in the query sequence, its value
-cannot exceed the read length.
+N, i.e., $29$ in the case shown in figure~\ref{fig::01}. Since the offset is defined as a position in the query 
+sequence, its value cannot exceed the read length.
 
-Some offsets may give artifactually large read counts corresponding to CPR artifacts~\cite{pmid22537040}. 
-In Figure~\ref{fig::02} we show six split reads supporting the same splice junction with offsets~14 (Q1), 
-12 (Q2--Q4), and~8 (Q5--Q6). Note that offsets appear decreasing when sequentially processing lines a sorted 
-BAM file.
+Some offsets may give artifactually large read counts that are usually attributed to PCR 
+artifacts~\cite{pmid22537040}. In Figure~\ref{fig::02} we show six split reads supporting the same splice 
+junction with offsets~14 (Q1), 12 (Q2--Q4), and~8 (Q5--Q6). Note that offsets appear decreasing when sequentially 
+processing lines a sorted BAM file.
 %
 \begin{figure}[h]
 \footnotesize
