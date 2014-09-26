@@ -37,3 +37,8 @@ Version 3.0	May 28, 2014
 		3. The output format has changed for ssj (chr, str, nsplit, positions, offset, count)
 		4. aux test files for perl are sam2sj3 and sam2sb3
 
+
+Version 3.1 	Sep 26, 2014
+		1. continuous filter for sb
+		2. gz options added
+		3. v2 and v2 removed from the package
