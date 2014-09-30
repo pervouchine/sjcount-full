@@ -50,27 +50,28 @@ This error has to do with big zip libraries, not with samtools.
 
 USAGE
 
- ./sjcount_v3 -bam bam_file [-ssj junctions_output] [-ssc boundaries_output] [-log log_file] [-maxlen max_intron_length] [-minlen min_intron_length] [-read1 0|1] [-read2 0|1] [-nbins number_of_bins] [-binsize bin_size] [-lim number_of_lines] [-quiet]
 
-Input:   a (sorted) BAM file
+Usage: ./sjcount -bam bam_file [-ssj junctions_output] [-ssc boundaries_output] [-log log_file] [-read1 0|1] [-read2 0|1] [-nbins number_of_bins] [-lim number_of_lines] [-quiet]
+sjcount v3.1
+
+Input:  a sorted BAM file with header
 
 Options:
-
 	-read1 0/1, reverse complement read1 no/yes (default=1)
 	-read2 0/1, reverse complement read2 no/yes (default=0)
-	-nbins number of bins for offsets, (default=1)
-	-lim nreads stop after nreads, (default=no limit)
+	-nbins number of overhang bins, (default=1)
 	-maxnh, the max value of the NH tag, (default=none)
+	-lim nreads stop after nreads, (default=no limit)
+	-unstranded, force strand to be '.'
 	-continuous, no mismatches when overlapping splice boundaries
-	-unstranded, force strand=0
+	-gz, gzip output ('.gz' extension will *NOT* be added to output file name)
 	-quiet, suppress verbose output
 
 Output:	-ssj: Splice Junction counts, tab-delimited  (default=stdout)
 	Columns are: chr, begin, end, strand, offset, count
 	-ssc: Splice boundary counts, tab-delimited  (default=none)
-	Columns are: chr, position, position, strand, offset, count
 
 ============================================================================
 
 DETAILS
-	See documentation in latex/sjcount_v3.pdf
+	See documentation in latex/sjcount.pdf
