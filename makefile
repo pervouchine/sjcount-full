@@ -4,10 +4,10 @@ SAMTOOLS_DIR=samtools-0.1.18/
 
 .PHONY: all clean test
 
-all:  sjcount-3.1
+all:  j_count b_count sjcount
 
 clean ::
-	rm -f -r sjcount-3.1 progressbar.o
+	rm -f -r j_count b_count sjcount progressbar.o
 
 ${SAMTOOLS_DIR}libbam.a:
 	wget http://sourceforge.net/projects/samtools/files/samtools/0.1.18/samtools-0.1.18.tar.bz2
@@ -19,8 +19,14 @@ ${SAMTOOLS_DIR}libbam.a:
 progressbar.o : progressbar.c progressbar.h
 	$(GCC) -c progressbar.c 
 
-sjcount-3.1 : sjcount-3.1.c progressbar.o ${SAMTOOLS_DIR}libbam.a
-	$(GCC) -I ${SAMTOOLS_DIR} sjcount-3.1.c progressbar.o ${SAMTOOLS_DIR}libbam.a -lz -o sjcount-3.1
+sjcount : sjcount.c progressbar.o ${SAMTOOLS_DIR}libbam.a
+	$(GCC) -I ${SAMTOOLS_DIR} sjcount.c progressbar.o ${SAMTOOLS_DIR}libbam.a -lz -o sjcount
+
+j_count : j_count.c progressbar.o ${SAMTOOLS_DIR}libbam.a
+	$(GCC) -I ${SAMTOOLS_DIR} j_count.c progressbar.o ${SAMTOOLS_DIR}libbam.a -lz -o j_count
+
+b_count : b_count.c progressbar.o ${SAMTOOLS_DIR}libbam.a
+	$(GCC) -I ${SAMTOOLS_DIR} b_count.c progressbar.o ${SAMTOOLS_DIR}libbam.a -lz -o b_count
 
 ${LATEXDIR}sjcount.pdf : ${LATEXDIR}sjcount.tex
 	pdflatex -output-directory=${LATEXDIR} ${LATEXDIR}sjcount.tex
@@ -36,8 +42,14 @@ PARAMS=-nbins 50 -read1 0 -read2 0 -quiet -lim 100000
 ${TESTDIR}test.bam : 
 	wget genome.crg.es/~dmitri/export/sjcount/test.bam -O ${TESTDIR}test.bam
 
-${TESTDIR}test.ssj ${TESTDIR}test.ssc : ${TESTBAM} sjcount-3.1
-	sjcount-3.1 -bam ${TESTBAM} ${PARAMS} -ssj ${TESTDIR}test.ssj -ssc ${TESTDIR}test.ssc
+#${TESTDIR}test.ssj ${TESTDIR}test.ssc : ${TESTBAM} sjcount_v3
+#        sjcount_v3 -bam ${TESTBAM} ${PARAMS} -ssj ${TESTDIR}test.ssj -ssc ${TESTDIR}test.ssc
+
+${TESTDIR}test.ssj : ${TESTBAM} j_count
+	j_count -bam ${TESTBAM} ${PARAMS} -ssj ${TESTDIR}test.ssj -ssc ${TESTDIR}test.ssc
+
+${TESTDIR}test.ssc : ${TESTBAM} b_count
+	b_count -bam ${TESTBAM} ${PARAMS} -ssj ${TESTDIR}test.ssj -ssc ${TESTDIR}test.ssc
 
 ${TESTDIR}control.ssj : ${TESTBAM} ${TESTDIR}sam2sj3.pl
 	${SAMTOOLS_DIR}samtools view ${TESTBAM}  | perl ${TESTDIR}sam2sj3.pl ${PARAMS} | sort > ${TESTDIR}control.ssj
