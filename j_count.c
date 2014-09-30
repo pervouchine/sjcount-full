@@ -273,6 +273,14 @@ int main(int argc,char* argv[]) {
         fprintf(log_file,"[Warning: only continuous reads overlap splice boundaries]\n");
     }
 
+    if(max_nh>0) {
+        fprintf(log_file,"[Warning: max value of NH tag is %i]\n", max_nh);
+    }
+
+    if(nbins>0) {
+        fprintf(log_file,"[Warning: %i bins for offsets]\n", nbins);
+    }
+
     for(s = 0; s < 2; s++) {
 	if(rev_compl[s]) fprintf(log_file,"[Warning: will take reverse complement of read %i]\n", s+1);
     }
