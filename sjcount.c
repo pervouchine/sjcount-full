@@ -413,15 +413,14 @@ int main(int argc,char* argv[]) {
 
     for(i = 0; i < header->n_targets; i++) {
         r = root_site[i];
-        while(r != NULL) {
+/*        while(r != NULL) {
 	    for(j=0; j<2; j++) {
             	for(k = 0; k < nbins; k++) {
-if(r->count[j][k]) fprintf(stderr,"!");
 		    r->count[j][k] = 0;
 		}
 	    }
             r = r->next;
-        }
+        }*/
 	curr_site[i] = &root_site[i];
     }
 

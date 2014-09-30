@@ -80,13 +80,13 @@ void update_site(site **ptr, int pos, int strand, int offset, int v) {
         ptr = &((*ptr)->next);
     }
     if(*ptr != NULL && (*ptr)->pos == pos) {
-        (*ptr)->count[strand][offset]++;
+        (*ptr)->count[strand][offset]+=v;
     }
     else {
         site *next = (*ptr);
         (*ptr) = new site(pos);
         (*ptr)->next = next;
-        (*ptr)->count[strand][offset]++;
+        (*ptr)->count[strand][offset]+=v;
     }
 }
 
@@ -281,14 +281,14 @@ int main(int argc,char* argv[]) {
 
     for(i = 0; i < header->n_targets; i++) {
         r = root_site[i];
-        while(r != NULL) {
+       /* while(r != NULL) {
 	    for(j=0; j<2; j++) {
             	for(k = 0; k < nbins; k++) {
 		    r->count[j][k] = 0;
 		}
 	    }
             r = r->next;
-        }
+        }*/
 	curr_site[i] = &root_site[i];
     }
 
