@@ -57,6 +57,7 @@ sjcount v3.1
 Input:  a sorted BAM file with header
 
 Options:
+
 	-read1 0/1, reverse complement read1 no/yes (default=1)
 	-read2 0/1, reverse complement read2 no/yes (default=0)
 	-nbins number of overhang bins, (default=1)
@@ -67,7 +68,9 @@ Options:
 	-gz, gzip output ('.gz' extension will *NOT* be added to output file name)
 	-quiet, suppress verbose output
 
-Output:	-ssj: Splice Junction counts, tab-delimited  (default=stdout)
+Output:
+
+	-ssj: Splice Junction counts, tab-delimited  (default=stdout)
 	Columns are: chr, begin, end, strand, offset, count
 	-ssc: Splice boundary counts, tab-delimited  (default=none)
 
