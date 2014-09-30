@@ -35,7 +35,7 @@ Prerequisites:
 
 NOTE that
 
-1.	If uyou have samtools already installed, you can simply update the SAMTOOLS_DIR varibale in the makefile
+1.	If samtools is already installed, you can simply update the SAMTOOLS_DIR varibale in the makefile
 
 2.	Some users get error messages even when compiling sjcount with a correct SAMDIR path, something like
 
