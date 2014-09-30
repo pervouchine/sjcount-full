@@ -137,13 +137,13 @@ void update_site(site **ptr, int pos, int strand, int offset, int v) {
         ptr = &((*ptr)->next);
     }
     if(*ptr != NULL && (*ptr)->pos == pos) {
-        (*ptr)->count[strand][offset]++;
+        (*ptr)->count[strand][offset]+=v;
     }
     else {
         site *next = (*ptr);
         (*ptr) = new site(pos);
         (*ptr)->next = next;
-        (*ptr)->count[strand][offset]++;
+        (*ptr)->count[strand][offset]+=v;
     }
 }
 
