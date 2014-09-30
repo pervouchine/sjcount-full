@@ -416,6 +416,7 @@ int main(int argc,char* argv[]) {
         while(r != NULL) {
 	    for(j=0; j<2; j++) {
             	for(k = 0; k < nbins; k++) {
+if(r->count[j][k]) fprintf(stderr,"!");
 		    r->count[j][k] = 0;
 		}
 	    }

@@ -37,7 +37,7 @@ ${LATEXDIR}sjcount.pdf : ${LATEXDIR}sjcount.tex
 TESTDIR=test/
 TESTBAM=${TESTDIR}test.bam
 
-PARAMS=-nbins 50 -read1 0 -read2 0 -quiet -lim 100000
+PARAMS=-nbins 50 -read1 0 -read2 0 -quiet -lim 1000000
 
 ${TESTDIR}test.bam : 
 	wget genome.crg.es/~dmitri/export/sjcount/test.bam -O ${TESTDIR}test.bam
@@ -45,11 +45,15 @@ ${TESTDIR}test.bam :
 #${TESTDIR}test.ssj ${TESTDIR}test.ssc : ${TESTBAM} sjcount_v3
 #        sjcount_v3 -bam ${TESTBAM} ${PARAMS} -ssj ${TESTDIR}test.ssj -ssc ${TESTDIR}test.ssc
 
-${TESTDIR}test.ssj : ${TESTBAM} j_count
-	j_count -bam ${TESTBAM} ${PARAMS} -ssj ${TESTDIR}test.ssj -ssc ${TESTDIR}test.ssc
+#${TESTDIR}test.ssj : ${TESTBAM} j_count
+#	j_count -bam ${TESTBAM} ${PARAMS} -ssj ${TESTDIR}test.ssj -ssc ${TESTDIR}test.ssc
+#
+#${TESTDIR}test.ssc : ${TESTBAM} b_count
+#	b_count -bam ${TESTBAM} ${PARAMS} -ssj ${TESTDIR}test.ssj -ssc ${TESTDIR}test.ssc
+#
 
-${TESTDIR}test.ssc : ${TESTBAM} b_count
-	b_count -bam ${TESTBAM} ${PARAMS} -ssj ${TESTDIR}test.ssj -ssc ${TESTDIR}test.ssc
+${TESTDIR}test.ssj ${TESTDIR}test.ssc : ${TESTBAM} sjcount
+	sjcount -bam ${TESTBAM} ${PARAMS} -ssj ${TESTDIR}test.ssj -ssc ${TESTDIR}test.ssc
 
 ${TESTDIR}control.ssj : ${TESTBAM} ${TESTDIR}sam2sj3.pl
 	${SAMTOOLS_DIR}samtools view ${TESTBAM}  | perl ${TESTDIR}sam2sj3.pl ${PARAMS} | sort > ${TESTDIR}control.ssj
