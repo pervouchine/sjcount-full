@@ -236,28 +236,32 @@ int main(int argc,char* argv[]) {
 
     ssj_file = zipped ? gzopen(ssj_file_name,"r") : fopen(ssj_file_name,"r");
     fprintf(log_file, "[Reading %s]", ssj_file_name);
+
+    fprintf(log_file, "[Reading %s", ssj_file_name);
     while(1) {
-	buff[0]=0;
-	if(zipped) {
-	    gzgets((gzFile)ssj_file, buff, MAXFILEBUFFLENGTH);
-	}
-	else {
-	    fgets(buff, MAXFILEBUFFLENGTH, (FILE*)ssj_file);
-	}
-	if(strlen(buff)==0) break;
-	sscanf(buff, "%s %i %i", &aux, &i, &offset);
-	if(i!=1) continue;
-	for(j=0;j<strlen(aux);j++) if(aux[j]=='_') aux[j]=' ';
-	sscanf(aux, "%s %i %i %c", &chr[0], &beg, &end, &s);
-	ref_id = -1;
-	for(i=0; i < header->n_targets; i++) {
-	    if(strcmp(header->target_name[i], chr)==0) ref_id = i;
-	}
-	if(ref_id>=0) {
-	    update_site(curr_site[ref_id], beg, strand_c2i(s), offset, 0);
+        buff[0]=0;
+        if(zipped) {
+            gzgets((gzFile)ssj_file, buff, MAXFILEBUFFLENGTH);
+        }
+        else {
+            fgets(buff, MAXFILEBUFFLENGTH, (FILE*)ssj_file);
+        }
+        if(strlen(buff)==0) break;
+        sscanf(buff, "%s %i %i", &aux, &i, &offset);
+        if(i!=1) continue;
+        for(j=0;j<strlen(aux);j++) if(aux[j]=='_') aux[j]=' ';
+        sscanf(aux, "%s %i %i %c", &chr[0], &beg, &end, &s);
+        ref_id = -1;
+        for(i=0; i < header->n_targets; i++) {
+            if(strcmp(header->target_name[i], chr)==0) ref_id = i;
+        }
+        if(ref_id>=0) {
+            while((*curr_site[ref_id])!=NULL && (*curr_site[ref_id])->pos < beg) curr_site[ref_id] = &((*curr_site[ref_id])->next);
+            update_site(curr_site[ref_id], beg, strand_c2i(s), offset, 0);
             update_site(curr_site[ref_id], end, strand_c2i(s), offset, 0);
-	}
+        }
     }
+    fprintf(log_file, "]\n", ssj_file_name);
 
     //*****************************************************************************************************************************//
 
