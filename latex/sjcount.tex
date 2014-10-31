@@ -14,7 +14,7 @@
 
 \begin{document}
 
-\title{Quantification of Splice Junctions in RNA-seq Data by {\em sjcount} v3.0}
+\title{Quantification of Splice Junctions in RNA-seq Data by {\em sjcount} v3.1}
 
 \author{Dmitri D. Pervouchine\thanks{email: dp@crg.eu}}\affil{Centre for Genomic Regulation (CRG), Barcelona, Spain}
 
@@ -26,11 +26,11 @@
 
 The purpose of {\em sjcount} is to provide a fast utility for counting splice junctions in BAM files. 
 It is the annotation-agnostic version of \href{https://github.com/pervouchine/bam2ssj}{bam2ssj}. 
-This document describes the version {\bf v3.0} of {\em sjcount}. The older versions of {\em sjcount}
+This document describes the version {\bf v3.1} of {\em sjcount}. The older versions of {\em sjcount}
 (v1.0, v2.0) is also included in the package, but their use is deprecated.
 
 \section{Changes since previous version}
-The has been a substantial change between v2.0 and v3.0.
+The has been a substantial change from v2.x to v3.1.
 \begin{enumerate}
 \item The utility now counts and reports all reads with multi-splits (see definitions below)
 \item Accordingly, the output format has changed to accomidate multi-splits. One of the columns reports 
@@ -43,7 +43,7 @@ a pearl script which does the same counting job but has much easier syntax
 \section{Installation and usage}
 See README.md file for installation instructions. The program {\em sjcount} is used from the command line with the following keys
 \begin{verbatim}
-sjcount_v3 -bam bam_file [-ssj junctions_output] [-ssc boundary_output]
+sjcount -bam bam_file [-ssj junctions_output] [-ssc boundary_output]
        [-read1 0|1] [-read2 0|1] [-unstranded] [-nbins number_of_bins]
        [-lim number_of_lines] [-quiet]
 \end{verbatim}
@@ -98,7 +98,7 @@ of the alignment. If the CIGAR attribute contains several N's, then we have a {\
 is the number of N's in CIGAR. In this terms, each 1-split defines one splice junction while each $n$-split defines
 $n$ splice junctions. 
 
-Each multi-split is counted according to the number of splits so that, for example, the 
+Each multi-split is counted according to the number of splits. For example, the 
 alignment {\tt chr1\_100\_200\_300\_400\_500\_600\_+} is counted once as a 3-split, two times 
 as a 2-split ({\tt chr1\_100\_200\_300\_400\_+} and {\tt chr1\_300\_400\_500\_600\_+}), and three times 
 as single-split ({\tt chr1\_100\_200\_+}, {\tt chr\_300\_400\_+}, and {\tt chr1\_500\_600\_+}). The rationale behind 
