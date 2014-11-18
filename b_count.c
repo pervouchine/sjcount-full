@@ -279,7 +279,7 @@ int main(int argc,char* argv[]) {
         zipped = 0;
     }
     else {
-        ssc_file = zipped ? gzopen(ssc_file_name, "w") : fopen(ssc_file_name, "w");
+        ssc_file = zipped ? (void*)gzopen(ssc_file_name, "w") : (void*)fopen(ssc_file_name, "w");
         if(ssc_file == NULL) {
             fprintf(log_file,"[ERROR: cannot write to %s, exiting]\n", ssc_file_name);
 	    exit(1);

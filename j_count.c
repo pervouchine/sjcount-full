@@ -252,7 +252,7 @@ int main(int argc,char* argv[]) {
 	zipped = 0;
     }
     else {
-        ssj_file = zipped ? gzopen(ssj_file_name,"w") : fopen(ssj_file_name,"w");
+	ssj_file = zipped ? (void*)gzopen(ssj_file_name,"w") : (void*)fopen(ssj_file_name,"w");
         if(ssj_file == NULL) {
             fprintf(log_file,"[ERROR: cannot write to %s, exiting]\n", ssj_file_name);
             exit(1);
