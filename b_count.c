@@ -242,7 +242,7 @@ int main(int argc,char* argv[]) {
         curr_site[i] = &root_site[i];
     }
 
-    ssj_file = zipped ? gzopen(ssj_file_name,"r") : fopen(ssj_file_name,"r");
+    ssj_file = zipped ? (void*) gzopen(ssj_file_name,"r") : (void*) fopen(ssj_file_name,"r");
     fprintf(log_file, "[Reading %s]", ssj_file_name);
 
     fprintf(log_file, "[Reading %s", ssj_file_name);
