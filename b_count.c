@@ -172,7 +172,7 @@ int main(int argc,char* argv[]) {
 	    fprintf(stderr, "\t-gz, gzip output ('.gz' extension will be added to output file names)\n");
 	    fprintf(stderr, "\t-quiet, suppress verbose output\n\n"); 
             fprintf(stderr, "Output:\n\t-ssc: Splice boundary counts, tab-delimited  (default=none)\n");
-            fprintf(stderr, "\tColumns are: chr, position, strand, offset, count\n");
+            fprintf(stderr, "\tColumns are: chr_pos_strand, 0, offset, count\n");
             exit(1);
         }
 

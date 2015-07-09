@@ -230,9 +230,9 @@ int main(int argc,char* argv[]) {
 	    fprintf(stderr, "\t-gz, gzip output ('.gz' extension will *NOT* be added to output file name)\n");
 	    fprintf(stderr, "\t-quiet, suppress verbose output\n\n"); 
             fprintf(stderr, "Output:\t-ssj: Splice Junction counts, tab-delimited  (default=stdout)\n");
-            fprintf(stderr, "\tColumns are: chr, begin, end, strand, offset, count\n");
+            fprintf(stderr, "\tColumns are: chr_beg1_end1_beg2_end2_..._str, n_splits, offset, count\n");
             fprintf(stderr, "\t-ssc: Splice boundary counts, tab-delimited  (default=none)\n");
-            fprintf(stderr, "\tColumns are: chr, position, strand, offset, count\n");
+            fprintf(stderr, "\tColumns are: chr_pos_strand, 0, offset, count\n");
             exit(1);
         }
 
